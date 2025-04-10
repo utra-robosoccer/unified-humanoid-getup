@@ -101,7 +101,7 @@ python test_env.py --normal --std 2
 You can train an agent using:
 
 ```bash
-python train_sbx.py \
+python3.10 train_sbx.py \
     --algo crossq \
     --env frasa-standup-v0 \
     --conf hyperparams/crossq.yml
@@ -121,7 +121,7 @@ The trained agent will be stored in `logs\[algo]\[env]_[exp-id]`.
 If a trained agent exists, you can see it in action using:
 
 ```bash
-python enjoy_sbx.py \
+python3.10 enjoy_sbx.py \
     --algo crossq \
     --env frasa-standup-v0 \
     --gym-packages frasa_env \
@@ -225,7 +225,7 @@ $$ R = R_{state} + R_{variation} + R_{collision} $$
 
 The state proximity reward $R_{state}$ represents the proximity to the desired state $\psi_{target}$:
 
-$$ R_{state} = \text{exp}\left(-20 \cdot \left| \psi_{current} - \psi_\{target} \right|^2 \right) $$
+$$ R_{state} = \text{exp}\left(-20 \cdot \left| \psi_{current} - \psi_{target} \right|^2 \right) $$
 
 2. Variation Penalty Reward
 

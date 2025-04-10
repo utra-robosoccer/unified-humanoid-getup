@@ -31,7 +31,9 @@ class StandupEnv(gymnasium.Env):
             # "desired_state": np.deg2rad([-49.5, 19.5, -52, 79, -36.5, -8.5]),
             # "desired_state": np.deg2rad([49.5, 19.5, 52, -82.15, 36.5, 0.65374085940294579533,0.65374085940294579533]),
             # "desired_state": np.deg2rad([0.65374085940294579533, 29.13318501]),
-            "desired_state": np.deg2rad([29.13318501]),
+            # "desired_state": np.deg2rad([29.13318501]),
+            "desired_state": np.deg2rad([57.29]), # 38.525680187183610315
+            # "desired_state": np.deg2rad([31.455094774119341849,0]),
             # Probability of seeding the robot in finale position
             "reset_final_p": 0.1,
             # Termination conditions
@@ -274,7 +276,7 @@ class StandupEnv(gymnasium.Env):
 
             self.tilt_history.append(self.get_tilt())
             self.dtilt_history.append(self.sim.get_gyro()[1])
-            self.height_history.append(self.sim.get_T_world_site("camera")[2,3])
+            self.height_history.append(self.sim.get_head_height())
 
             if self.render_mode == "human":
                 self.sim.render(self.options["render_realtime"])
@@ -298,16 +300,19 @@ class StandupEnv(gymnasium.Env):
         self.q_history = self.q_history[-self.q_history_size :]
         self.tilt_history = self.tilt_history[-self.tilt_history_size :]
         self.dtilt_history = self.dtilt_history[-self.dtilt_history_size :]
-        self.dtilt_history = self.dtilt_history[-self.height_history_size:]
+        self.height_history = self.height_history[-self.height_history_size:]
 
         # Extracting observation
         obs = self.get_observation()
 
         # state_current = [self.tilt_history[-1],self.height_history[-1]]
+        # state_current = [self.height_history[-1],self.tilt_history[-1]]
         state_current = [self.height_history[-1]]
-
-        reward = np.exp(-20 * (np.linalg.norm(np.array(state_current) - np.array(self.options["desired_state"])) ** 2))
-
+        reward = np.exp(-10 * (np.linalg.norm(np.array(state_current) - np.array(self.options["desired_state"])) ** 2))
+        if ((abs(0.67 - state_current[0])/0.67) * 100)  < 10:
+            reward += np.exp(
+                -10 * (np.linalg.norm(np.array([self.tilt_history[-1]]) - np.array([0])) ** 2))
+        # print(f"reward: {reward}, state_current: {state_current}, desired_state: {self.options['desired_state']}, PITCH: {self.tilt_history[-1]}")
         action_variation = np.abs(action - self.previous_actions[-1])
         self.previous_actions.append(action)
         self.previous_actions = self.previous_actions[-self.options["previous_actions"] :]
@@ -462,7 +467,7 @@ class StandupEnv(gymnasium.Env):
         # Initializing the tilt history
         self.tilt_history = [self.get_tilt()] * self.tilt_history_size
         self.dtilt_history = [0] * self.dtilt_history_size
-        self.height_history = [self.sim.get_T_world_site("camera")[2,3]] * self.height_history_size
+        self.height_history = [self.sim.get_head_height()] * self.height_history_size
         # Initializing the previous action
         self.previous_actions = [np.zeros(len(self.dofs))] * self.options["previous_actions"]
 

@@ -270,6 +270,14 @@ class Simulator:
                 time.sleep(to_sleep)
 
         self.viewer.sync()
+    def get_head_height(self):
+        left_foot = self.get_T_world_site('left_foot')[0:3][:, 3]
+        right_foot = self.get_T_world_site('right_foot')[0:3][:, 3]
+        foot = (left_foot + right_foot) / 2
+        head_height = self.get_T_world_site('camera')[2][3] - foot[2]
+        # if self.get_T_world_site('camera')[2][3] < foot[2]:
+        #     head_height = -10
+        return head_height
 
 
 if __name__ == "__main__":
@@ -281,16 +289,16 @@ if __name__ == "__main__":
     start = time.time()
     while True:
         sim.render(True)
-        sim.set_control("left_elbow", 0.863938)
-        sim.set_control("right_elbow", 0.863938)
-        sim.set_control("right_shoulder_pitch", 0.3403392)
-        sim.set_control("left_shoulder_pitch", 0.3403392)
-        sim.set_control("right_hip_pitch", 0.907571)
-        sim.set_control("left_hip_pitch", 0.907571)
-        sim.set_control("right_knee", -1.4338038100846235)
-        sim.set_control("left_knee", -1.4338038100846235)
-        sim.set_control("right_ankle_pitch", 0.6370452)
-        sim.set_control("left_ankle_pitch", 0.6370452)
+        # sim.set_control("left_elbow", 0.863938)
+        # sim.set_control("right_elbow", 0.863938)
+        # sim.set_control("right_shoulder_pitch", 0.3403392)
+        # sim.set_control("left_shoulder_pitch", 0.3403392)
+        # sim.set_control("right_hip_pitch", 0.907571)
+        # sim.set_control("left_hip_pitch", 0.907571)
+        # sim.set_control("right_knee", -1.4338038100846235)
+        # sim.set_control("left_knee", -1.4338038100846235)
+        # sim.set_control("right_ankle_pitch", 0.6370452)
+        # sim.set_control("left_ankle_pitch", 0.6370452)
 
         # sim.set_control("left_elbow", 0)
         # sim.set_control("right_elbow", 0)
@@ -315,8 +323,21 @@ if __name__ == "__main__":
         # sim.set_control("right_ankle_pitch", -0.6370452)
         # sim.set_control("left_ankle_pitch", -0.6370452)
         R = sim.data.site("trunk").xmat
+        pitch = np.arctan2(R[6], R[8])
         print(np.arctan2(R[6], R[8]))
-        # print(sim.get_gyro())
+        # print(sim.get_T_world_site('camera')[0:3][:,3])
+        # print(sim.get_T_world_site('left_foot')[0:3][:,3])
+        # print(sim.get_T_world_site('right_foot')[0:3][:, 3])
+        # left_foot = sim.get_T_world_site('left_foot')[0:3][:,3]
+        # right_foot = sim.get_T_world_site('right_foot')[0:3][:,3]
+        # foot = (left_foot+right_foot)/2
+        # head_height = np.linalg.norm(sim.get_T_world_site('camera')[0:3][:,3] - foot)
+        print(sim.get_head_height())
+        # print(head_height * (1-abs(pitch)) )
+        dofs = ["elbow", "shoulder_pitch", "hip_pitch", "knee", "ankle_pitch"]
+        ctrl = [sim.get_control(f"left_{dof}") for dof in dofs]
+        print(ctrl)
+
         sim.step()
 
         elapsed = time.time() - start
