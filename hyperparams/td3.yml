@@ -1,0 +1,30 @@
+
+frasa-standup-v0:
+  n_timesteps: !!float 30e6
+  policy: 'MlpPolicy'
+  learning_starts: 10000
+  noise_type: 'ornstein-uhlenbeck'
+  noise_std: 0.25
+  noise_schedule: 'linear'
+  train_freq: 1
+  gradient_steps: 1
+  n_envs: 4
+  learning_rate: !!float 1e-3
+  batch_size: 256
+  policy_kwargs: "dict(net_arch=[400, 300], activation_fn=nn.ELU)"
+
+# Attempt for 10ms / 25ms
+frasa-standup-v0-10ms:
+  n_timesteps: !!float 50e6
+  policy: 'MlpPolicy'
+  learning_starts: 40000
+  noise_type: 'ornstein-uhlenbeck'
+  noise_std: 0.25
+  noise_schedule: 'linear'
+  train_freq: 1
+  gradient_steps: 1
+  n_envs: 4
+  learning_rate: !!float 1e-3
+  batch_size: 512
+  gamma: 0.999
+  policy_kwargs: "dict(net_arch=[400, 300], activation_fn=nn.LeakyReLU)"

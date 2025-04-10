@@ -1,0 +1,16 @@
+
+frasa-standup-v0:
+  n_timesteps: !!float 15e6
+  policy: 'MlpPolicy'
+  learning_rate: lin_7.3e-4
+  buffer_size: 300000
+  n_envs: 4
+  batch_size: 256
+  ent_coef: 'auto'
+  gamma: 0.999
+  tau: 0.02
+  train_freq: 8
+  gradient_steps: 8
+  learning_starts: 10000
+  top_quantiles_to_drop_per_net: 5
+  policy_kwargs: "dict(net_arch=[256, 256], activation_fn=nn.ELU)"

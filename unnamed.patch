@@ -1,0 +1,26 @@
+Index: frasa_env/env/standup_env.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/frasa_env/env/standup_env.py b/frasa_env/env/standup_env.py
+--- a/frasa_env/env/standup_env.py	
++++ b/frasa_env/env/standup_env.py	(date 1744003766037)
+@@ -113,7 +113,7 @@
+                     # dtilt (16)
+                     -10,
+                     # height (17)
+-                    0.4
++                    0.4,
+                     # Previous action
+                     *(list(self.action_space.low) * self.options["previous_actions"]),
+                 ],
+@@ -132,7 +132,7 @@
+                     # dtilt (16)
+                     10,
+                     # height (17)
+-                    0.4
++                    0.4,
+                     # Previous action
+                     *(list(self.action_space.high) * self.options["previous_actions"]),
+                 ],

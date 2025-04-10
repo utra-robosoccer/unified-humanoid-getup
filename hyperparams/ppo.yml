@@ -1,0 +1,19 @@
+frasa-standup-v0:
+  n_timesteps: !!float 100e6
+  policy: 'MlpPolicy'
+  gamma: 0.998
+  n_envs: 16
+  n_steps: 512
+  batch_size: 64
+  n_epochs: 2
+  learning_rate: 5.0e-05
+  gae_lambda: 0.95
+  ent_coef: 0.0001
+  use_sde: True
+  sde_sample_freq: 3
+  policy_kwargs: "dict(
+                    log_std_init=-2,
+                    ortho_init=False,
+                    activation_fn=nn.ReLU,
+                    net_arch=dict(pi=[256, 256], vf=[256, 256])
+                    )"

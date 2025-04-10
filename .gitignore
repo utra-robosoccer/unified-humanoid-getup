@@ -1,0 +1,8 @@
+sigmaban_model
+**/__pycache__
+**.pyc
+**.json
+#**.pkl
+data/
+*.egg-info
+**/logs
