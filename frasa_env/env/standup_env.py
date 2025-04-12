@@ -357,6 +357,7 @@ class StandupEnv(gymnasium.Env):
             reward = np.exp(
                 -10 * (np.linalg.norm(np.array(state_current) - np.array(self.options["desired_state"])) ** 2))
             desired_height = 0.54  # 0.67
+            desired_height = 0.67
             if ((abs(desired_height - state_current[0]) / desired_height) * 100) < 10:
                 reward += np.exp(
                     -10 * (np.linalg.norm(np.array([self.tilt_history[-1][1]]) - np.array([0])) ** 2))

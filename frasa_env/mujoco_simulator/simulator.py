@@ -16,7 +16,7 @@ class Simulator:
         self.model_dir = model_dir
 
         # Load the model and data
-        self.model: mujoco.MjModel = mujoco.MjModel.from_xml_path(f"{model_dir}/scene2.xml")
+        self.model: mujoco.MjModel = mujoco.MjModel.from_xml_path(f"{model_dir}/scene.xml")
         self.data: mujoco.MjData = mujoco.MjData(self.model)
 
         # Retrieve the degrees of freedom id/name pairs
