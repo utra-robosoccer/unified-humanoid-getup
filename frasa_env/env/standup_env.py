@@ -357,7 +357,8 @@ class StandupEnv(gymnasium.Env):
             reward = np.exp(
                 -10 * (np.linalg.norm(np.array(state_current) - np.array(self.options["desired_state"])) ** 2))
             desired_height = 0.54  # 0.67
-            desired_height = 0.67
+            # desired_height = 0.67
+            desired_height = 0.62
             if ((abs(desired_height - state_current[0]) / desired_height) * 100) < 10:
                 reward += np.exp(
                     -10 * (np.linalg.norm(np.array([self.tilt_history[-1][1]]) - np.array([0])) ** 2))
@@ -523,8 +524,8 @@ class StandupEnv(gymnasium.Env):
         if use_cache and self.initial_config is not None:
             if self.selected_task == "getup": # TODO check if this sets to 0,0
                 qpos, ctrl = random.choice(self.initial_config)
-                self.sim.data.qpos[:27] = qpos
-                self.sim.data.ctrl[:27] = ctrl
+                self.sim.data.qpos[:len(qpos)] = qpos
+                self.sim.data.ctrl[:len(ctrl)] = ctrl
                 self.sim.data.qvel *= 0
                 self.sim.step()
             else:

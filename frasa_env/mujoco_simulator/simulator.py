@@ -16,7 +16,7 @@ class Simulator:
         self.model_dir = model_dir
 
         # Load the model and data
-        self.model: mujoco.MjModel = mujoco.MjModel.from_xml_path(f"{model_dir}/scene.xml")
+        self.model: mujoco.MjModel = mujoco.MjModel.from_xml_path(f"{model_dir}/scene3.xml")
         self.data: mujoco.MjData = mujoco.MjData(self.model)
 
         # Retrieve the degrees of freedom id/name pairs
@@ -411,6 +411,7 @@ if __name__ == "__main__":
         left_foot = sim.get_T_world_site('left_foot')[2][3]
         right_foot = sim.get_T_world_site('right_foot')[2][3]
         foot = (left_foot+right_foot)/2
+        print(sim.get_head_height())
         # print(foot)
         # head_height = np.linalg.norm(sim.get_T_world_site('camera')[0:3][:,3] - foot)
         # print(sim.get_T_world_site('ball')[0:3][:,3])
