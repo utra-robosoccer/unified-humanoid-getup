@@ -1,3 +1,4 @@
+import math
 import os
 import pickle
 import random
@@ -64,9 +65,15 @@ class StandupEnv(gymnasium.Env):
 
         self.render_mode = render_mode
         self.sim = Simulator()
-
+        self.task_id = {
+            "walk": [1, 0, 0],
+            "kick": [0, 1, 0],
+            "getup": [0, 0, 1]
+        }
+        self.selected_task = "getup"
         # Degrees of freedom involved
-        self.dofs = ["elbow", "shoulder_pitch", "hip_pitch", "knee", "ankle_pitch"]
+        self.dofs = ["hip_yaw","hip_roll","ankle_roll","elbow", "shoulder_pitch", "hip_pitch", "knee", "ankle_pitch"]
+        # self.dofs = ["elbow", "shoulder_pitch", "hip_pitch", "knee", "ankle_pitch"]
         self.ranges = [self.sim.model.actuator(f"left_{dof}").ctrlrange for dof in self.dofs]
 
         # Pre-fetching indexes and sites for faster evaluation
@@ -105,6 +112,8 @@ class StandupEnv(gymnasium.Env):
         self.observation_space = spaces.Box(
             np.array(
                 [
+                    # 1 hot
+                    *np.array([0,0,0]),
                     # q (0-4)
                     *(-np.pi * np.ones(len(self.dofs))),
                     # dq (5-9)
@@ -112,11 +121,15 @@ class StandupEnv(gymnasium.Env):
                     # ctrl (10-14)
                     *self.range_low,
                     # tilt (15)
-                    -np.pi,
+                    *np.array([-np.pi,-np.pi,-np.pi]),
                     # dtilt (16)
-                    -10,
+                    *np.array([-10,-10,-10]),
                     # height (17)
-                    0.4,
+                    0,
+                    #ball
+                    *np.array([-10, -10, -10]),
+                    #walk
+                     *np.array([-1, -1]),
                     # Previous action
                     *(list(self.action_space.low) * self.options["previous_actions"]),
                 ],
@@ -124,6 +137,8 @@ class StandupEnv(gymnasium.Env):
             ),
             np.array(
                 [
+                    # 1 hot
+                    *np.array([1, 1, 1]),
                     # q (0-4)
                     *(np.pi * np.ones(len(self.dofs))),
                     # dq (5-9)
@@ -131,11 +146,15 @@ class StandupEnv(gymnasium.Env):
                     # ctrl (10-14)
                     *self.range_high,
                     # tilt (15)
-                    np.pi,
+                    *np.array([np.pi, np.pi, np.pi]),
                     # dtilt (16)
-                    10,
+                    *np.array([10, 10, 10]),
                     # height (17)
-                    0.4,
+                    1,
+                    # ball
+                    *np.array([10, 10, 10]),
+                     # walk
+                     *np.array([1, 1]),
                     # Previous action
                     *(list(self.action_space.high) * self.options["previous_actions"]),
                 ],
@@ -168,7 +187,7 @@ class StandupEnv(gymnasium.Env):
         self.frictionloss_original = self.sim.model.dof_frictionloss.copy()
         self.forcerange_original = self.sim.model.actuator_forcerange.copy()
         self.body_quat_original = self.sim.model.body_quat.copy()
-
+        self.goal = [1,0]
         # Loading initial configuration cache
         initial_config_path = self.get_initial_config_filename()
         self.initial_config = None
@@ -181,8 +200,13 @@ class StandupEnv(gymnasium.Env):
         return os.path.join(os.path.dirname(os.path.realpath(__file__)), "standup_initial_configurations.pkl")
 
     def apply_control(self, q: np.ndarray, reset: bool = False) -> None:
+        if self.selected_task == "getup":
+            q[:3] = 0 # Masking uncessary dof
+
         self.sim.data.ctrl[self.left_actuators_indexes] = q
         self.sim.data.ctrl[self.right_actuators_indexes] = q
+        # todo apply masking for the getup tasks
+
 
         if reset:
             for k, dof in enumerate(self.dofs):
@@ -207,17 +231,33 @@ class StandupEnv(gymnasium.Env):
         dtilt = self.dtilt_history[0]
 
         height = self.height_history[0]
-        # gyro = self.sim.get_gyro()
-        # dtilt = gyro[1]
+
+        one_hot = self.task_id[self.selected_task]
+        if self.selected_task == "getup":
+            ball = np.array([0, 0, 0])
+            # walk
+            walk =  np.array([0, 0])
+        elif self.selected_task == "walk":
+            ball = np.array([0, 0, 0])
+            # walk
+            walk =  np.array(self.compute_vector(self.sim.get_T_world_site('trunk')[0:3][:,3], self.goal))
+        elif self.selected_task == "kick":
+            ball = np.array([self.sim.get_T_world_site('ball')[0:3][:,3]]) #TODO add ball and func to get
+            # walk
+            walk =  np.array([0, 0])
+
 
         return np.array(
             [
+                *one_hot,
                 *q,
                 *q_dot,
                 *ctrl,
-                tilt,
-                dtilt,
+                *tilt,
+                *dtilt,
                 height,
+                *ball,
+                *walk,
                 *(np.array(self.previous_actions).flatten()),
             ],
             dtype=np.float32,
@@ -274,8 +314,8 @@ class StandupEnv(gymnasium.Env):
             q = [self.sim.get_q(f"left_{dof}") for dof in self.dofs]
             self.q_history.append(q)
 
-            self.tilt_history.append(self.get_tilt())
-            self.dtilt_history.append(self.sim.get_gyro()[1])
+            self.tilt_history.append(self.sim.get_rpy())
+            self.dtilt_history.append(self.sim.get_gyro())
             self.height_history.append(self.sim.get_head_height())
 
             if self.render_mode == "human":
@@ -283,15 +323,23 @@ class StandupEnv(gymnasium.Env):
 
         # Terminating in case of upside down robot
         if self.options["terminate_upside_down"]:
-            tilt = self.get_tilt()
-            if np.rad2deg(np.abs(tilt)) > 135:
+            roll, pitch, _ = self.sim.get_rpy()
+            if np.rad2deg(np.abs(pitch)) > 135:
                 done = True
+            if self.selected_task != "getup":
+                if np.rad2deg(np.abs(roll)) > 135:
+                    done = True
 
         # Penalizing high gyro
         if self.options["terminate_gyro"]:
             gyro = self.sim.get_gyro()
             if abs(gyro[1]) > 5:
                 done = True
+            if self.selected_task != "getup":
+                if abs(gyro[0]) > 5:
+                    done = True
+                if abs(gyro[2]) > 5:
+                    done = True
 
         # Shock termination
         if self.options["terminate_shock"] and shock:
@@ -304,15 +352,15 @@ class StandupEnv(gymnasium.Env):
 
         # Extracting observation
         obs = self.get_observation()
-
-        # state_current = [self.tilt_history[-1],self.height_history[-1]]
-        # state_current = [self.height_history[-1],self.tilt_history[-1]]
-        state_current = [self.height_history[-1]]
-        reward = np.exp(-10 * (np.linalg.norm(np.array(state_current) - np.array(self.options["desired_state"])) ** 2))
-        if ((abs(0.67 - state_current[0])/0.67) * 100)  < 10:
-            reward += np.exp(
-                -10 * (np.linalg.norm(np.array([self.tilt_history[-1]]) - np.array([0])) ** 2))
-        # print(f"reward: {reward}, state_current: {state_current}, desired_state: {self.options['desired_state']}, PITCH: {self.tilt_history[-1]}")
+        if self.selected_task == "getup":
+            state_current = [self.height_history[-1]]
+            reward = np.exp(
+                -10 * (np.linalg.norm(np.array(state_current) - np.array(self.options["desired_state"])) ** 2))
+            desired_height = 0.54  # 0.67
+            if ((abs(desired_height - state_current[0]) / desired_height) * 100) < 10:
+                reward += np.exp(
+                    -10 * (np.linalg.norm(np.array([self.tilt_history[-1][1]]) - np.array([0])) ** 2))
+            # print(f"reward: {reward}, state_current: {state_current}, desired_state: {self.options['desired_state']}, PITCH: {self.tilt_history[-1]}")
         action_variation = np.abs(action - self.previous_actions[-1])
         self.previous_actions.append(action)
         self.previous_actions = self.previous_actions[-self.options["previous_actions"] :]
@@ -424,6 +472,34 @@ class StandupEnv(gymnasium.Env):
         # Wait for the robot to stabilize
         for _ in range(round(self.options["stabilization_time"] / self.sim.dt)):
             self.sim.step()
+    @staticmethod
+    def compute_vector(current_pose, goal_position, local_frame=True):
+        # Unpack current pose and goal position
+        x, y, theta = current_pose
+        x_goal, y_goal = goal_position
+
+        # Compute the global difference vector
+        dx = x_goal - x
+        dy = y_goal - y
+
+        if not local_frame:
+            # Use the global vector directly
+            v_x, v_y = dx, dy
+        else:
+            # Transform the vector to the robot's local frame by rotating by -theta
+            cos_theta = math.cos(-theta)
+            sin_theta = math.sin(-theta)
+            v_x = dx * cos_theta - dy * sin_theta
+            v_y = dx * sin_theta + dy * cos_theta
+
+        norm = math.hypot(v_x, v_y)  # Computes sqrt(v_x**2 + v_y**2)
+        if norm != 0:
+            v_x, v_y = v_x / norm, v_y / norm
+        else:
+            # Return a zero vector if the computed vector is (0, 0)
+            v_x, v_y = 0, 0
+
+        return v_x, v_y
 
     def reset(
         self,
@@ -432,6 +508,7 @@ class StandupEnv(gymnasium.Env):
     ):
         super().reset(seed=seed)
         self.sim.reset()
+        # TODO add here code for randomizing the selection check
         options = options or {}
         target = options.get("target", False)
         use_cache = options.get("use_cache", True)
@@ -443,11 +520,16 @@ class StandupEnv(gymnasium.Env):
 
         # Initial robot configuration
         if use_cache and self.initial_config is not None:
-            qpos, ctrl = random.choice(self.initial_config)
-            self.sim.data.qpos = qpos
-            self.sim.data.ctrl = ctrl
-            self.sim.data.qvel *= 0
-            self.sim.step()
+            if self.selected_task == "getup": # TODO check if this sets to 0,0
+                qpos, ctrl = random.choice(self.initial_config)
+                self.sim.data.qpos[:27] = qpos
+                self.sim.data.ctrl[:27] = ctrl
+                self.sim.data.qvel *= 0
+                self.sim.step()
+            else:
+                self.sim.data.qvel *= 0
+                self.sim.step()
+                self.sim.set_T_world_site("left_foot", np.eye(4))
         else:
             self.randomize_fall(target)
 
@@ -465,8 +547,8 @@ class StandupEnv(gymnasium.Env):
         self.q_history = [q] * self.q_history_size
 
         # Initializing the tilt history
-        self.tilt_history = [self.get_tilt()] * self.tilt_history_size
-        self.dtilt_history = [0] * self.dtilt_history_size
+        self.tilt_history = [self.sim.get_rpy()] * self.tilt_history_size
+        self.dtilt_history = [self.sim.get_gyro()] * self.dtilt_history_size
         self.height_history = [self.sim.get_head_height()] * self.height_history_size
         # Initializing the previous action
         self.previous_actions = [np.zeros(len(self.dofs))] * self.options["previous_actions"]

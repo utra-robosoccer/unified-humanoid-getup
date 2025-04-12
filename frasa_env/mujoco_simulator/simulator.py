@@ -16,7 +16,7 @@ class Simulator:
         self.model_dir = model_dir
 
         # Load the model and data
-        self.model: mujoco.MjModel = mujoco.MjModel.from_xml_path(f"{model_dir}/scene.xml")
+        self.model: mujoco.MjModel = mujoco.MjModel.from_xml_path(f"{model_dir}/scene2.xml")
         self.data: mujoco.MjData = mujoco.MjData(self.model)
 
         # Retrieve the degrees of freedom id/name pairs
@@ -52,6 +52,8 @@ class Simulator:
         return [mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_ACTUATOR, i) for i in range(self.model.nu)]
 
     def reset(self) -> None:
+        # self.model: mujoco.MjModel = mujoco.MjModel.from_xml_path(f"{self.model_dir}/scene2.xml")
+        # self.data: mujoco.MjData = mujoco.MjData(self.model)
         mujoco.mj_resetData(self.model, self.data)
 
     def reset_render(self) -> None:
@@ -275,10 +277,16 @@ class Simulator:
         right_foot = self.get_T_world_site('right_foot')[0:3][:, 3]
         foot = (left_foot + right_foot) / 2
         head_height = self.get_T_world_site('camera')[2][3] - foot[2]
-        # if self.get_T_world_site('camera')[2][3] < foot[2]:
-        #     head_height = -10
+        if self.get_T_world_site('camera')[2][3] < foot[2]:
+            head_height = -10
         return head_height
 
+    def get_rpy(self) -> np.ndarray:
+        R = self.data.site("trunk").xmat
+        pitch = np.arctan2(-R[6], np.sqrt(R[0] ** 2 + R[3] ** 2))
+        roll = np.arctan2(R[7], R[8])  # atan2(R[2,1], R[2,2])
+        yaw = np.arctan2(R[3], R[0])
+        return np.array([roll, pitch, yaw])
 
 if __name__ == "__main__":
     sim = Simulator()
@@ -287,8 +295,11 @@ if __name__ == "__main__":
 
     sim.step()
     start = time.time()
+    model_dir = os.path.join(os.path.dirname(__file__) + "/model/")
+    once = True
     while True:
         sim.render(True)
+        # sim.set_T_world_site("left_foot", np.eye(4))
         # sim.set_control("left_elbow", 0.863938)
         # sim.set_control("right_elbow", 0.863938)
         # sim.set_control("right_shoulder_pitch", 0.3403392)
@@ -324,19 +335,28 @@ if __name__ == "__main__":
         # sim.set_control("left_ankle_pitch", -0.6370452)
         R = sim.data.site("trunk").xmat
         pitch = np.arctan2(R[6], R[8])
-        print(np.arctan2(R[6], R[8]))
+        # print(R)
+        dofs = ["hip_yaw", "hip_roll", "ankle_roll", "elbow", "shoulder_pitch", "hip_pitch", "knee",
+                "ankle_pitch"]
+        x = [sim.get_actuator_index(f"left_{dof}") for dof in dofs]
         # print(sim.get_T_world_site('camera')[0:3][:,3])
+        print(sim.t)
+        # if sim.t > 5 and once:
+        #     sim.model: mujoco.MjModel = mujoco.MjModel.from_xml_path(f"{model_dir}/scene.xml")
+        #     sim.data: mujoco.MjData = mujoco.MjData(sim.model)
+        #     once = False
         # print(sim.get_T_world_site('left_foot')[0:3][:,3])
         # print(sim.get_T_world_site('right_foot')[0:3][:, 3])
-        # left_foot = sim.get_T_world_site('left_foot')[0:3][:,3]
-        # right_foot = sim.get_T_world_site('right_foot')[0:3][:,3]
-        # foot = (left_foot+right_foot)/2
+        left_foot = sim.get_T_world_site('left_foot')[2][3]
+        right_foot = sim.get_T_world_site('right_foot')[2][3]
+        foot = (left_foot+right_foot)/2
+        print(foot)
         # head_height = np.linalg.norm(sim.get_T_world_site('camera')[0:3][:,3] - foot)
-        print(sim.get_head_height())
+        # print(sim.get_T_world_site('ball')[0:3][:,3])
         # print(head_height * (1-abs(pitch)) )
-        dofs = ["elbow", "shoulder_pitch", "hip_pitch", "knee", "ankle_pitch"]
-        ctrl = [sim.get_control(f"left_{dof}") for dof in dofs]
-        print(ctrl)
+        # dofs = ["elbow", "shoulder_pitch", "hip_pitch", "knee", "ankle_pitch"]
+        # ctrl = [sim.get_control(f"left_{dof}") for dof in dofs]
+        # print(ctrl)
 
         sim.step()
 
