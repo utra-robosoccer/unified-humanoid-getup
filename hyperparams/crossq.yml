@@ -52,7 +52,7 @@ frasa-standup-v0: &frasa-standup
   gradient_steps: 512
   learning_starts: 100000
   policy_kwargs: "dict(
-    net_arch=[384, 256]
+    net_arch=[512, 512, 256]
   )"
 
 frasa-standup-v0-vt:
