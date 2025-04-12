@@ -283,11 +283,70 @@ class Simulator:
 
     def get_rpy(self) -> np.ndarray:
         R = self.data.site("trunk").xmat
-        pitch = np.arctan2(-R[6], np.sqrt(R[0] ** 2 + R[3] ** 2))
+        # pitch = np.arctan2(-R[6], np.sqrt(R[0] ** 2 + R[3] ** 2)) #
+        pitch =-np.arctan2(R[6], R[8])
         roll = np.arctan2(R[7], R[8])  # atan2(R[2,1], R[2,2])
         yaw = np.arctan2(R[3], R[0])
-        return np.array([roll, pitch, yaw])
+        # fused, tilt = self.fused_tilt_from_xmat(R)
+        # psi, theta, phi, h = fused
 
+        # return np.array([phi, psi, theta])
+        return np.array([roll, pitch, yaw])
+    @staticmethod
+    def fused_tilt_from_xmat(xmat):
+        """
+        Convert a MuJoCo site/body xmat (length‑9, row‑major) to
+        fused angles (yaw, pitch, roll, hemi) and tilt angles
+        (yaw, tilt‑axis angle γ, tilt‑angle α).
+
+        Returns
+        -------
+        fused : tuple[float, float, float, int]
+            (ψ, θ, φ, h)  in radians, h ∈ {+1,‑1}
+        tilt  : tuple[float, float, float]
+            (ψ, γ, α) in radians
+        """
+
+        # reshape once so we can use the usual matrix subscripts
+        R = np.asarray(xmat, dtype=float).reshape(3, 3)
+
+        # --- fused pitch, roll, hemisphere (always robust) --------------------
+        theta = np.arcsin(-R[2, 0])  # θ = asin(‑R31)
+        phi = np.arcsin(R[2, 1])  # φ = asin( R32)
+        h = 1 if R[2, 2] >= 0 else -1  # hemisphere sign(R33)
+
+        # --- fused yaw --------------------------------------------------------
+        #
+        #  ψ  = 2 * atan2(q_z, q_w)
+        #  with a quaternion built from the matrix (avoids the piece‑wise Eq.(26))
+        #
+        tr = R.trace()
+        if tr > 0.0:
+            s = 2.0 * np.sqrt(tr + 1.0)
+            qw = 0.25 * s
+            qz = (R[1, 0] - R[0, 1]) / s
+        else:  # fall‑back for trace ≤ 0
+            if R[2, 2] > R[1, 1] and R[2, 2] > R[0, 0]:
+                s = 2.0 * np.sqrt(1.0 + R[2, 2] - R[0, 0] - R[1, 1])
+                qw = (R[0, 1] - R[1, 0]) / s
+                qz = 0.25 * s
+            elif R[1, 1] > R[0, 0]:
+                s = 2.0 * np.sqrt(1.0 + R[1, 1] - R[0, 0] - R[2, 2])
+                qw = (R[0, 2] - R[2, 0]) / s
+                qz = (R[1, 0] + R[0, 1]) / s / 2.0
+            else:
+                s = 2.0 * np.sqrt(1.0 + R[0, 0] - R[1, 1] - R[2, 2])
+                qw = (R[2, 1] - R[1, 2]) / s
+                qz = (R[0, 1] + R[1, 0]) / s / 2.0
+        psi = 2.0 * np.arctan2(qz, qw)  # wrap to (‑π,π] automatically
+
+        # --- tilt‑axis angle γ and tilt‑angle α -------------------------------
+        gamma = np.arctan2(-R[2, 0], R[2, 1])  # γ = atan2(‑R31, R32)
+        alpha = np.arccos(R[2, 2])  # α = acos( R33)
+
+        fused = (psi, theta, phi, h)
+        tilt = (psi, gamma, alpha)
+        return fused, tilt
 if __name__ == "__main__":
     sim = Simulator()
     sim.step()
@@ -340,17 +399,19 @@ if __name__ == "__main__":
                 "ankle_pitch"]
         x = [sim.get_actuator_index(f"left_{dof}") for dof in dofs]
         # print(sim.get_T_world_site('camera')[0:3][:,3])
-        print(sim.t)
+        # print(sim.t)
         # if sim.t > 5 and once:
         #     sim.model: mujoco.MjModel = mujoco.MjModel.from_xml_path(f"{model_dir}/scene.xml")
         #     sim.data: mujoco.MjData = mujoco.MjData(sim.model)
         #     once = False
         # print(sim.get_T_world_site('left_foot')[0:3][:,3])
         # print(sim.get_T_world_site('right_foot')[0:3][:, 3])
+        print(f"Pitch2: {np.rad2deg(sim.get_rpy())}")
+
         left_foot = sim.get_T_world_site('left_foot')[2][3]
         right_foot = sim.get_T_world_site('right_foot')[2][3]
         foot = (left_foot+right_foot)/2
-        print(foot)
+        # print(foot)
         # head_height = np.linalg.norm(sim.get_T_world_site('camera')[0:3][:,3] - foot)
         # print(sim.get_T_world_site('ball')[0:3][:,3])
         # print(head_height * (1-abs(pitch)) )
@@ -362,4 +423,4 @@ if __name__ == "__main__":
 
         elapsed = time.time() - start
         frames = sim.frame
-        print(f"Elapsed: {elapsed:.2f}, Frames: {frames}, FPS: {frames / elapsed:.2f}")
+        # print(f"Elapsed: {elapsed:.2f}, Frames: {frames}, FPS: {frames / elapsed:.2f}")

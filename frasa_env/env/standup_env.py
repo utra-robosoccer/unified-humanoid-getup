@@ -360,7 +360,7 @@ class StandupEnv(gymnasium.Env):
             if ((abs(desired_height - state_current[0]) / desired_height) * 100) < 10:
                 reward += np.exp(
                     -10 * (np.linalg.norm(np.array([self.tilt_history[-1][1]]) - np.array([0])) ** 2))
-            # print(f"reward: {reward}, state_current: {state_current}, desired_state: {self.options['desired_state']}, PITCH: {self.tilt_history[-1]}")
+            # print(f"PITCH: {np.rad2deg(self.tilt_history[-1][1])} Pitch2: {np.rad2deg(self.get_tilt())}")
         action_variation = np.abs(action - self.previous_actions[-1])
         self.previous_actions.append(action)
         self.previous_actions = self.previous_actions[-self.options["previous_actions"] :]
