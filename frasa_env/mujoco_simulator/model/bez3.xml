@@ -326,8 +326,8 @@
   </actuator>
 
   <sensor>
-    <gyro name="gyro" site="trunk" />
-    <accelerometer name="accelerometer" site="trunk" />
+    <gyro name="gyro" site="torso" />
+    <accelerometer name="accelerometer" site="torso" />
   </sensor>
 
   <!--sensor>

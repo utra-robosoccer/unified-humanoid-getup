@@ -405,6 +405,8 @@
 
     <sensor>
         <gyro site="torso" name="gyro" />
+                <accelerometer site="torso" name="accelerometer" />
+
         <force site="left_foot_cleat_front_right" name="left_foot_cleat_front_right" />
         <force site="left_foot_cleat_front_left" name="left_foot_cleat_front_left" />
         <force site="left_foot_cleat_back_right" name="left_foot_cleat_back_right" />

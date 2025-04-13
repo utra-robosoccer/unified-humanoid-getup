@@ -2,7 +2,7 @@
   <compiler angle="radian"/>
 
   <worldbody>
-    <body name="ball"  pos="1 0 0.14">
+    <body name="ball"  pos="2 0 0.14">
       <freejoint name="ball" />
       <site name="ball" />
       <inertial pos="0 0 0" mass="0.3" diaginertia="0.00128 0.00128 0.00128"/>

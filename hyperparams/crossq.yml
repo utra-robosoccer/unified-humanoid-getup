@@ -50,7 +50,7 @@ frasa-standup-v0: &frasa-standup
   ent_coef: 'auto'
   train_freq: 4
   gradient_steps: 512
-  learning_starts: 100000
+  learning_starts: 50000
   policy_kwargs: "dict(
     net_arch=[512, 512, 256]
   )"

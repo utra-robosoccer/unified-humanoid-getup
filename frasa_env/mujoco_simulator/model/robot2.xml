@@ -160,8 +160,8 @@
   </worldbody>
 
   <sensor>
-        <gyro site="trunk" name="gyro" />
-
+        <gyro site="torso" name="gyro" />
+        <accelerometer site="torso" name="accelerometer" />
     </sensor>
   <actuator>
         <position class="mx64" name="left_hip_roll" joint="left_hip_roll" ctrlrange="-0.785398 1.5708" />

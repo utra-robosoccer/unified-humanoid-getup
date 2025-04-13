@@ -64,13 +64,16 @@ class StandupEnv(gymnasium.Env):
         self.options.update(options or {})
 
         self.render_mode = render_mode
-        self.sim = Simulator()
+        self.sim = Simulator(scene_name="scene.xml")
         self.task_id = {
             "walk": [1, 0, 0],
             "kick": [0, 1, 0],
             "getup": [0, 0, 1]
         }
+
         self.selected_task = "getup"
+        self.selected_task = "walk"
+        # self.selected_task = "kick"
         # Degrees of freedom involved
         self.dofs = ["hip_yaw","hip_roll","ankle_roll","elbow", "shoulder_pitch", "hip_pitch", "knee", "ankle_pitch"]
         # self.dofs = ["elbow", "shoulder_pitch", "hip_pitch", "knee", "ankle_pitch"]
@@ -124,6 +127,8 @@ class StandupEnv(gymnasium.Env):
                     *np.array([-np.pi,-np.pi,-np.pi]),
                     # dtilt (16)
                     *np.array([-10,-10,-10]),
+                    #accel
+                    *np.array([-40, -40, -40]),
                     # height (17)
                     0,
                     #ball
@@ -149,6 +154,8 @@ class StandupEnv(gymnasium.Env):
                     *np.array([np.pi, np.pi, np.pi]),
                     # dtilt (16)
                     *np.array([10, 10, 10]),
+                    # accel
+                    *np.array([40, 40, 40]),
                     # height (17)
                     1,
                     # ball
@@ -167,6 +174,12 @@ class StandupEnv(gymnasium.Env):
         self.q_history = []
         self.q_history_size = max(1, round(self.options["qdot_delay"] / self.sim.dt))
 
+        self.pose_history = []
+        self.pose_history_size = max(1, round(self.options["qdot_delay"] / self.sim.dt))
+
+        self.ball_history = []
+        self.ball_history_size = max(1, round(self.options["qdot_delay"] / self.sim.dt))
+
         # Window for tilt delay simulation
         self.tilt_history = []
         self.tilt_history_size = max(1, round(self.options["tilt_delay"] / self.sim.dt))
@@ -177,6 +190,8 @@ class StandupEnv(gymnasium.Env):
         self.dtilt_history = []
         self.dtilt_history_size = max(1, round(self.options["dtilt_delay"] / self.sim.dt))
 
+        self.accel_history = []
+        self.accel_history_size = max(1, round(self.options["tilt_delay"] / self.sim.dt))
         # Values for randomization
         self.trunk_body = "torso_2023"
         self.trunk_mass = self.sim.model.body(self.trunk_body).mass.copy()
@@ -188,6 +203,7 @@ class StandupEnv(gymnasium.Env):
         self.forcerange_original = self.sim.model.actuator_forcerange.copy()
         self.body_quat_original = self.sim.model.body_quat.copy()
         self.goal = [1,0]
+
         # Loading initial configuration cache
         initial_config_path = self.get_initial_config_filename()
         self.initial_config = None
@@ -202,7 +218,8 @@ class StandupEnv(gymnasium.Env):
     def apply_control(self, q: np.ndarray, reset: bool = False) -> None:
         if self.selected_task == "getup":
             q[:3] = 0 # Masking uncessary dof
-
+        elif self.selected_task == "walk":
+            q[3:5] = 0 # Masking uncessary dof
         self.sim.data.ctrl[self.left_actuators_indexes] = q
         self.sim.data.ctrl[self.right_actuators_indexes] = q
         # todo apply masking for the getup tasks
@@ -229,6 +246,7 @@ class StandupEnv(gymnasium.Env):
         # Tilt, dtilt
         tilt = self.tilt_history[0]
         dtilt = self.dtilt_history[0]
+        accel = self.accel_history[0]
 
         height = self.height_history[0]
 
@@ -240,10 +258,12 @@ class StandupEnv(gymnasium.Env):
         elif self.selected_task == "walk":
             ball = np.array([0, 0, 0])
             # walk
-            walk =  np.array(self.compute_vector(self.sim.get_T_world_site('trunk')[0:3][:,3], self.goal))
+            curr_pose = [self.sim.get_T_world_site('torso')[0:3][0,3],self.sim.get_T_world_site('torso')[0:3][2,3], tilt[2]]
+            walk =  np.array(self.compute_vector(curr_pose, self.goal))
         elif self.selected_task == "kick":
-            ball = np.array([self.sim.get_T_world_site('ball')[0:3][:,3]]) #TODO add ball and func to get
+            ball = np.array(self.sim.get_T_world_site('ball')[0:3][:,3]) #TODO add ball and func to get
             # walk
+            # print(ball)
             walk =  np.array([0, 0])
 
 
@@ -255,6 +275,7 @@ class StandupEnv(gymnasium.Env):
                 *ctrl,
                 *tilt,
                 *dtilt,
+                *accel,
                 height,
                 *ball,
                 *walk,
@@ -313,43 +334,52 @@ class StandupEnv(gymnasium.Env):
 
             q = [self.sim.get_q(f"left_{dof}") for dof in self.dofs]
             self.q_history.append(q)
-
+            self.pose_history.append(self.sim.get_T_world_site('torso')[0:3][:, 3])
+            self.ball_history.append(self.sim.get_T_world_site('ball')[0:3][:, 3])
             self.tilt_history.append(self.sim.get_rpy())
             self.dtilt_history.append(self.sim.get_gyro())
+            self.accel_history.append(self.sim.get_accel())
             self.height_history.append(self.sim.get_head_height())
 
             if self.render_mode == "human":
                 self.sim.render(self.options["render_realtime"])
-
         # Terminating in case of upside down robot
         if self.options["terminate_upside_down"]:
             roll, pitch, _ = self.sim.get_rpy()
             if np.rad2deg(np.abs(pitch)) > 135:
                 done = True
             if self.selected_task != "getup":
-                if np.rad2deg(np.abs(roll)) > 135:
+                if np.rad2deg(np.abs(roll)) > 45:
                     done = True
-
+                if np.rad2deg(np.abs(pitch)) > 45:
+                    done = True
+            # _, pitch, _ = self.sim.get_rpy("left_foot")
+            # # print(f" {np.rad2deg(pitch)}" )
+            # if np.rad2deg(np.abs(pitch)) > 150:
+            #     done = True
         # Penalizing high gyro
         if self.options["terminate_gyro"]:
             gyro = self.sim.get_gyro()
-            if abs(gyro[1]) > 5:
-                done = True
-            if self.selected_task != "getup":
-                if abs(gyro[0]) > 5:
+            if self.selected_task == "getup":
+                if abs(gyro[1]) > 5:
                     done = True
-                if abs(gyro[2]) > 5:
-                    done = True
-
+            # if self.selected_task != "getup":
+                # if abs(gyro[0]) > 5:
+                #     done = True
+                # if abs(gyro[2]) > 5:
+                #     done = True
+        # print("2 ", done,gyro)
         # Shock termination
         if self.options["terminate_shock"] and shock:
             done = True
-
+        # print("3: ", done)
         self.q_history = self.q_history[-self.q_history_size :]
+        self.pose_history = self.pose_history[-self.pose_history_size:]
+        self.ball_history = self.ball_history[-self.ball_history_size:]
         self.tilt_history = self.tilt_history[-self.tilt_history_size :]
         self.dtilt_history = self.dtilt_history[-self.dtilt_history_size :]
         self.height_history = self.height_history[-self.height_history_size:]
-
+        self.accel_history = self.accel_history[-self.accel_history_size:]
         # Extracting observation
         obs = self.get_observation()
         if self.selected_task == "getup":
@@ -357,12 +387,82 @@ class StandupEnv(gymnasium.Env):
             reward = np.exp(
                 -10 * (np.linalg.norm(np.array(state_current) - np.array(self.options["desired_state"])) ** 2))
             desired_height = 0.54  # 0.67
-            # desired_height = 0.67
-            desired_height = 0.62
+            desired_height = 0.67
+            # desired_height = 0.62
             if ((abs(desired_height - state_current[0]) / desired_height) * 100) < 10:
                 reward += np.exp(
                     -10 * (np.linalg.norm(np.array([self.tilt_history[-1][1]]) - np.array([0])) ** 2))
             # print(f"PITCH: {np.rad2deg(self.tilt_history[-1][1])} Pitch2: {np.rad2deg(self.get_tilt())}")
+        elif self.selected_task == "walk":
+            desired_height = 0.54  # 0.67
+            desired_height = 0.67
+            # desired_height = 0.62
+            fall_penalty = 0
+            # print("4: ", done)
+            # print(self.height_history[-1],desired_height*0.7,  self.height_history[-1] < desired_height*0.7)
+            if self.height_history[-1] < desired_height*0.8:
+                done = True
+                fall_penalty = 100
+
+            _, pitch, yaw = self.sim.get_rpy()
+            curr_pose = [self.sim.get_T_world_site('torso')[0:3][0, 3], self.sim.get_T_world_site('torso')[0:3][2, 3],
+                         yaw]
+            # print(curr_pose)
+            dist_goal = self.compute_vector(curr_pose, self.goal,normalized = True)
+            pose_dot = (np.array(self.pose_history[-1]) - np.array(self.pose_history[0])) / (
+                        self.pose_history_size * self.sim.dt)
+            # print(dist_goal)
+            # print("vel: ", pose_dot)
+            vel_fwd_reward = np.dot(dist_goal, pose_dot[:2])
+            upright_reward = np.clip(np.cos(pitch), 0.0, 1.0) # might not be scaled enough
+            qdot = (np.array(self.q_history[-1]) - np.array(self.q_history[0])) / (self.q_history_size * self.sim.dt)
+            energy_penalty = 0 #np.mean(np.abs(qdot))
+            # print(f"vel: {2*vel_fwd_reward:.2f}, upright: {0.1*upright_reward:.2f}, energy: {- 0.1*energy_penalty:.2f}")
+            reward = 2*vel_fwd_reward  + 0.1*upright_reward - 0.1*energy_penalty-fall_penalty
+            if np.linalg.norm(self.goal-self.sim.get_T_world_site('torso')[0:3][0:2, 3] ) < 0.05:
+                reward += 100
+            # print(vel_fwd_reward)
+        elif self.selected_task == "kick":
+            desired_height = 0.54  # 0.67
+            desired_height = 0.67
+            # desired_height = 0.62
+            fall_penalty = 0
+            # print("4: ", done)
+            # print(self.height_history[-1],desired_height*0.7,  self.height_history[-1] < desired_height*0.7)
+            if self.height_history[-1] < desired_height*0.8:
+                done = True
+                fall_penalty = 10
+
+            _, pitch, yaw = self.sim.get_rpy()
+            curr_pose = [self.sim.get_T_world_site('torso')[0:3][0, 3], self.sim.get_T_world_site('torso')[0:3][2, 3],
+                         yaw]
+            # print(curr_pose)
+            dist_goal = self.compute_vector(curr_pose, self.goal,normalized = True)
+            pose_dot = (np.array(self.pose_history[-1]) - np.array(self.pose_history[0])) / (
+                        self.pose_history_size * self.sim.dt)
+            # print(dist_goal)
+            # print("vel: ", pose_dot)
+            vel_fwd_reward = np.dot(dist_goal, pose_dot[:2])
+
+            ball_pose = [self.sim.get_T_world_site('ball')[0:3][0, 3], self.sim.get_T_world_site('ball')[0:3][2, 3],
+                         yaw]
+            # print(curr_pose)
+            dist_goal = self.compute_vector(ball_pose, self.goal, normalized=True)
+            ball_dot = (np.array(self.ball_history[-1]) - np.array(self.ball_history[0])) / (
+                    self.ball_history_size * self.sim.dt)
+            # print(dist_goal)
+            # print("vel: ", pose_dot)
+            ball_vel_fwd_reward = 0
+            # print(np.linalg.norm(ball_dot[0:2]))
+            if np.linalg.norm(ball_dot[0:2]) > 0.05:
+                ball_vel_fwd_reward = np.dot(dist_goal, ball_dot[:2])
+            upright_reward = np.clip(np.cos(pitch), 0.0, 1.0) # might not be scaled enough
+            qdot = (np.array(self.q_history[-1]) - np.array(self.q_history[0])) / (self.q_history_size * self.sim.dt)
+            energy_penalty = np.mean(np.abs(qdot))
+
+            reward = ball_vel_fwd_reward + vel_fwd_reward + 0.5*upright_reward - 0.1*energy_penalty-fall_penalty
+            if np.linalg.norm(self.goal-self.sim.get_T_world_site('ball')[0:3][0:2, 3] ) < 0.05:
+                reward += 100
         action_variation = np.abs(action - self.previous_actions[-1])
         self.previous_actions.append(action)
         self.previous_actions = self.previous_actions[-self.options["previous_actions"] :]
@@ -475,7 +575,7 @@ class StandupEnv(gymnasium.Env):
         for _ in range(round(self.options["stabilization_time"] / self.sim.dt)):
             self.sim.step()
     @staticmethod
-    def compute_vector(current_pose, goal_position, local_frame=True):
+    def compute_vector(current_pose, goal_position, local_frame=True, normalized = False):
         # Unpack current pose and goal position
         x, y, theta = current_pose
         x_goal, y_goal = goal_position
@@ -493,13 +593,13 @@ class StandupEnv(gymnasium.Env):
             sin_theta = math.sin(-theta)
             v_x = dx * cos_theta - dy * sin_theta
             v_y = dx * sin_theta + dy * cos_theta
-
-        norm = math.hypot(v_x, v_y)  # Computes sqrt(v_x**2 + v_y**2)
-        if norm != 0:
-            v_x, v_y = v_x / norm, v_y / norm
-        else:
-            # Return a zero vector if the computed vector is (0, 0)
-            v_x, v_y = 0, 0
+        if normalized:
+            norm = math.hypot(v_x, v_y)  # Computes sqrt(v_x**2 + v_y**2)
+            if norm != 0:
+                v_x, v_y = v_x / norm, v_y / norm
+            else:
+                # Return a zero vector if the computed vector is (0, 0)
+                v_x, v_y = 0, 0
 
         return v_x, v_y
 
@@ -547,11 +647,14 @@ class StandupEnv(gymnasium.Env):
         # Initializing the history
         q = [self.sim.get_q(f"left_{dof}") for dof in self.dofs]
         self.q_history = [q] * self.q_history_size
+        self.pose_history = [self.sim.get_T_world_site('torso')[0:3][:, 3]] * self.pose_history_size
+        self.ball_history = [self.sim.get_T_world_site('ball')[0:3][:, 3]] * self.ball_history_size
 
         # Initializing the tilt history
         self.tilt_history = [self.sim.get_rpy()] * self.tilt_history_size
         self.dtilt_history = [self.sim.get_gyro()] * self.dtilt_history_size
         self.height_history = [self.sim.get_head_height()] * self.height_history_size
+        self.accel_history = [self.sim.get_accel()] * self.accel_history_size
         # Initializing the previous action
         self.previous_actions = [np.zeros(len(self.dofs))] * self.options["previous_actions"]
 

@@ -22,24 +22,25 @@ def compute_vector(current_pose, goal_position, local_frame=True):
         v_x = dx * cos_theta - dy * sin_theta
         v_y = dx * sin_theta + dy * cos_theta
 
-    norm = math.hypot(v_x, v_y)  # Computes sqrt(v_x**2 + v_y**2)
-    if norm != 0:
-        v_x, v_y = v_x / norm, v_y / norm
-    else:
-        # Return a zero vector if the computed vector is (0, 0)
-        v_x, v_y = 0, 0
+    # norm = math.hypot(v_x, v_y)  # Computes sqrt(v_x**2 + v_y**2)
+    # if norm != 0:
+    #     v_x, v_y = v_x / norm, v_y / norm
+    # else:
+    #     # Return a zero vector if the computed vector is (0, 0)
+    #     v_x, v_y = 0, 0
 
     return v_x, v_y
 
 if __name__ == "__main__":
     # Example usage:
-    current_pose = (0, 0, 0)  # (x, y, theta in radians)
+    current_pose = (0.0
+                    , 0, 1)  # (x, y, theta in radians)
     goal_position = (1, 0)               # (x_goal, y_goal)
 
     # Compute the normalized 2D vector in the robot's local frame:
-    local_normalized_vector = compute_vector(current_pose, goal_position, local_frame=True, normalize_vector=True)
+    local_normalized_vector = compute_vector(current_pose, goal_position, local_frame=True, )
     print("Normalized 2D vector in robot's local frame:", local_normalized_vector)
 
     # Compute the normalized 2D vector in the global coordinate frame:
-    global_normalized_vector = compute_vector(current_pose, goal_position, local_frame=False, normalize_vector=True)
+    global_normalized_vector = compute_vector(current_pose, goal_position, local_frame=False, )
     print("Normalized 2D vector in global coordinates:", global_normalized_vector)
