@@ -141,6 +141,13 @@ Where the arguments are:
 * `load-best`: Used to load the best agent.
 * `exp-id 0`: The experiment ID to use (`0` meaning the latest).
 
+https://humanoid.robocup.org/hl-vs2022/teams/
+https://humanoid.robocup.org/materials/open-source/humanoid-soccer-competition/
+https://github.com/ichiro-its/tachimawari/blob/master/urdf/robot.urdf
+https://github.com/bit-bots/bitbots_main/blob/e26708bd1f35f117e1cf095483643d89951ebe19/bitbots_robot/wolfgang_description/urdf/robot.urdf
+https://github.com/NUbots/NUbots/blob/ce7527941ec471da07d52e3656db8aa9f01c5b00/shared/utility/platform/models/nugus/robot.urdf#L4
+https://github.com/NUbots/NUWebots/blob/main/protos/robot/nugus/robot.urdf
+https://mujoco.readthedocs.io/en/stable/models.html
 ## Sigmaban Model
 
 <img src="https://github.com/user-attachments/assets/0fab475c-8b60-48e9-aebe-0ca0506e3917" align=left height="260px">

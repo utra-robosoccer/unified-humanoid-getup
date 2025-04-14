@@ -434,10 +434,11 @@
         <position class="mx64" name="left_hip_yaw" joint="left_hip_yaw" ctrlrange="-1.0472 1.0472" />
         <position class="mx64" name="right_hip_yaw" joint="right_hip_yaw" ctrlrange="-1.0472 1.0472" />
         <position class="mx64" name="left_shoulder_pitch" joint="left_shoulder_pitch" ctrlrange="-2.18166 2.18166" />
-        <position class="mx64" name="left_shoulder_roll" joint="left_shoulder_roll" ctrlrange="-0.261799 1.309" />
         <position class="mx64" name="left_elbow" joint="left_elbow" ctrlrange="-2.79253 0.261799" />
         <position class="mx64" name="right_shoulder_pitch" joint="right_shoulder_pitch" ctrlrange="-2.18166 2.18166" />
-        <position class="mx64" name="right_shoulder_roll" joint="right_shoulder_roll" ctrlrange="-1.309 0.261799" />
         <position class="mx64" name="right_elbow" joint="right_elbow" ctrlrange="-2.79253 0.261799" />
+
+        <position class="mx64" name="left_shoulder_roll" joint="left_shoulder_roll" ctrlrange="-0.261799 1.309" />
+        <position class="mx64" name="right_shoulder_roll" joint="right_shoulder_roll" ctrlrange="-1.309 0.261799" />
     </actuator>
 </mujoco>

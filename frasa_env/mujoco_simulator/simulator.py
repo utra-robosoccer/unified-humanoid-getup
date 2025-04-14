@@ -9,7 +9,7 @@ import numpy as np
 
 
 class Simulator:
-    def __init__(self, model_dir: Optional[str] = None, scene_name:str = "scene.xml"):
+    def __init__(self, model_dir: Optional[str] = None, scene_name:str = "scene_sig.xml"):
         # If model_dir is not provided, use the current directory
         if model_dir is None:
             model_dir = os.path.join(os.path.dirname(__file__) + "/model/")
@@ -52,8 +52,6 @@ class Simulator:
         return [mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_ACTUATOR, i) for i in range(self.model.nu)]
 
     def reset(self) -> None:
-        # self.model: mujoco.MjModel = mujoco.MjModel.from_xml_path(f"{self.model_dir}/scene2.xml")
-        # self.data: mujoco.MjData = mujoco.MjData(self.model)
         mujoco.mj_resetData(self.model, self.data)
 
     def reset_render(self) -> None:
@@ -272,11 +270,11 @@ class Simulator:
         if self.viewer is None:
             self.viewer = mujoco.viewer.launch_passive(self.model, self.data)
             self.reset_render()
-        # if self.t >1.0:
-        #     self.model: mujoco.MjModel = mujoco.MjModel.from_xml_path(f"{model_dir}/scene.xml")
-        #     self.data: mujoco.MjData = mujoco.MjData(self.model)
-        #     self.viewer = mujoco.viewer.launch_passive(self.model, self.data)
-        #     self.reset_render()
+        if not hasattr(self, "viewer_start"):
+            self.reset_render()
+        # This snippet shows how you might reload the model
+        # after a certain time. In a switching mechanism, you would reinstantiate
+        # a new Simulator instead.
         if realtime:
             current_ts = self.viewer_start + self.frame * self.dt
             to_sleep = current_ts - time.time()
@@ -305,9 +303,27 @@ class Simulator:
         # return np.array([phi, psi, theta])
         return np.array([roll, pitch, yaw])
 
+    def close_viewer(self) -> None:
+        """
+        Closes the current viewer if one is open.
+        """
+        if self.viewer is not None:
+            try:
+                # Try to call a close or finish method if available.
+                if hasattr(self.viewer, "close"):
+                    self.viewer.close()
+                elif hasattr(self.viewer, "finish"):
+                    self.viewer.finish()
+            except Exception as e:
+                print(f"Error closing viewer: {e}")
+            finally:
+                self.viewer = None
 
 if __name__ == "__main__":
-    sim = Simulator(scene_name="scene2.xml")
+    sim = Simulator(scene_name="scene_sig.xml")
+    sim = Simulator(scene_name="scene_bez.xml")
+    # sim = Simulator(scene_name="scene_bez3.xml")
+    sim = Simulator(scene_name="scene_bez1.xml")
     sim.step()
     sim.set_T_world_site("left_foot", np.eye(4))
 
@@ -315,8 +331,25 @@ if __name__ == "__main__":
     start = time.time()
     model_dir = os.path.join(os.path.dirname(__file__) + "/model/")
     once = True
+    ran = np.linspace(-np.pi, np.pi, 100)
+    count = 0
+    ti = 0
     while True:
         sim.render(True)
+        # print(sim.t)
+        # sim.set_control("right_elbow", -1.2653655)
+        dofs = ["elbow", "shoulder_pitch", "hip_pitch", "knee", "ankle_pitch"]
+        tt = "shoulder_pitch"
+        sim.set_control("right_"+tt, ran[count])
+        sim.set_control("left_"+tt, ran[count])
+        print(ran[count])
+        ti += sim.dt
+        if ti >= 0.03 and count < 99 and sim.t > 2:
+            count+=1
+            ti = 0
+
+
+
         # sim.set_T_world_site("left_foot", np.eye(4))
         # sim.set_control("left_elbow", 0.863938)
         # sim.set_control("right_elbow", 0.863938)
@@ -354,23 +387,23 @@ if __name__ == "__main__":
         R = sim.data.site("trunk").xmat
         pitch = np.arctan2(R[6], R[8])
         # print(R)
-        dofs = ["hip_yaw", "hip_roll", "ankle_roll", "elbow", "shoulder_pitch", "hip_pitch", "knee",
-                "ankle_pitch"]
-        x = [sim.get_actuator_index(f"left_{dof}") for dof in dofs]
-        # print(sim.get_T_world_site('camera')[0:3][:,3])
-        # print(sim.t)
-        # if sim.t > 5 and once:
-        #     sim.model: mujoco.MjModel = mujoco.MjModel.from_xml_path(f"{model_dir}/scene.xml")
-        #     sim.data: mujoco.MjData = mujoco.MjData(sim.model)
-        #     once = False
-        # print(sim.get_T_world_site('left_foot')[0:3][:,3])
-        # print(sim.get_T_world_site('right_foot')[0:3][:, 3])
-        print(f"Pitch2: {np.rad2deg(sim.get_rpy())}")
 
-        left_foot = sim.get_T_world_site('left_foot')[2][3]
-        right_foot = sim.get_T_world_site('right_foot')[2][3]
-        foot = (left_foot+right_foot)/2
-        print(sim.get_accel())
+        x = [sim.get_actuator_index(f"left_{dof}") for dof in dofs]
+        # print(x)
+        # # print(sim.get_T_world_site('camera')[0:3][:,3])
+        # # print(sim.t)
+        # # if sim.t > 5 and once:
+        # #     sim.model: mujoco.MjModel = mujoco.MjModel.from_xml_path(f"{model_dir}/scene_sig.xml")
+        # #     sim.data: mujoco.MjData = mujoco.MjData(sim.model)
+        # #     once = False
+        # # print(sim.get_T_world_site('left_foot')[0:3][:,3])
+        # # print(sim.get_T_world_site('right_foot')[0:3][:, 3])
+        # print(f"Pitch2: {np.rad2deg(sim.get_rpy())}")
+        #
+        # left_foot = sim.get_T_world_site('left_foot')[2][3]
+        # right_foot = sim.get_T_world_site('right_foot')[2][3]
+        # foot = (left_foot+right_foot)/2
+        print(sim.get_head_height())
         # print(foot)
         # head_height = np.linalg.norm(sim.get_T_world_site('camera')[0:3][:,3] - foot)
         # print(sim.get_T_world_site('ball')[0:3][:,3])
@@ -383,4 +416,4 @@ if __name__ == "__main__":
 
         elapsed = time.time() - start
         frames = sim.frame
-        # print(f"Elapsed: {elapsed:.2f}, Frames: {frames}, FPS: {frames / elapsed:.2f}")
+        print(f"Elapsed: {elapsed:.2f}, Frames: {frames}, FPS: {frames / elapsed:.2f}")

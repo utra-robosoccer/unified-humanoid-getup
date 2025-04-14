@@ -8,7 +8,7 @@ import numpy as np
 
 
 class Simulator:
-    def __init__(self, model_dir: Optional[str] = None, scene_name: str = "scene.xml"):
+    def __init__(self, model_dir: Optional[str] = None, scene_name: str = "scene_sig.xml"):
         # If model_dir is not provided, use the current directory + /model/
         if model_dir is None:
             model_dir = os.path.join(os.path.dirname(__file__), "model")
@@ -217,7 +217,7 @@ class SwappableSimulator:
 
     def __init__(self, model_dir: Optional[str] = None, scene_names: Optional[list] = None):
         if scene_names is None:
-            scene_names = ["scene2.xml", "scene.xml"]
+            scene_names = ["scene_bez.xml", "scene_sig.xml", "scene_bez3.xml"]
         self.scene_names = scene_names
         self.current_index = 0  # Start with the first model
 
@@ -268,5 +268,5 @@ class SwappableSimulator:
 
 if __name__ == "__main__":
     # Instantiate SwappableSimulator with two model XML files.
-    swapper = SwappableSimulator(scene_names=["scene.xml", "scene2.xml"])
+    swapper = SwappableSimulator(scene_names=["scene_sig.xml", "scene_bez.xml", "scene_bez3.xml"])
     swapper.run(run_time=30.0, switch_interval=5.0)
