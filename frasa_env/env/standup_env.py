@@ -185,7 +185,7 @@ class StandupEnv(gymnasium.Env):
                     # dtilt (16)
                     *np.array([-10, -10, -10]),
                     # accel
-                    *np.array([-40, -40, -40]),
+                    # *np.array([-40, -40, -40]),
                     # height (17)
                     0,
                     # Previous action
@@ -206,7 +206,7 @@ class StandupEnv(gymnasium.Env):
                     # dtilt (16)
                     *np.array([10, 10, 10]),
                     # accel
-                    *np.array([40, 40, 40]),
+                    # *np.array([40, 40, 40]),
                     # height (17)
                     1,
                     # Previous action
@@ -270,7 +270,7 @@ class StandupEnv(gymnasium.Env):
                 *ctrl,
                 *tilt,
                 *dtilt,
-                *accel,
+                # *accel,
                 height,
                 *(np.array(self.previous_actions).flatten()),
             ],
@@ -491,7 +491,7 @@ class StandupEnv(gymnasium.Env):
             self.current_index= random.choice(range(len(self.scene_names)))
             self.count[self.current_index] +=1
             # print(self.count)
-            # self.current_index = 4
+            self.current_index = 6
             # self.current_index = (self.current_index + 1) % len(self.scene_names)
             new_scene = self.scene_names[self.current_index]
 
