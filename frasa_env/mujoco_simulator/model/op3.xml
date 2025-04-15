@@ -4,27 +4,27 @@
   <asset>
     <material name="black" rgba="0.2 0.2 0.2 1"/>
 
-    <mesh file="body.stl"/>
-    <mesh file="ll1.stl"/>
-    <mesh file="ll2.stl"/>
-    <mesh file="ll3.stl"/>
-    <mesh file="ll4.stl"/>
-    <mesh file="ll5.stl"/>
-    <mesh file="ll6.stl"/>
-    <mesh file="rl1.stl"/>
-    <mesh file="rl2.stl"/>
-    <mesh file="rl3.stl"/>
-    <mesh file="rl4.stl"/>
-    <mesh file="rl5.stl"/>
-    <mesh file="rl6.stl"/>
-    <mesh file="la1.stl"/>
-    <mesh file="la2.stl"/>
-    <mesh file="la3.stl"/>
-    <mesh file="ra1.stl"/>
-    <mesh file="ra2.stl"/>
-    <mesh file="ra3.stl"/>
-    <mesh file="h1.stl"/>
-    <mesh file="h2.stl"/>
+    <mesh file="simplified_convex/body.stl"/>
+    <mesh file="simplified_convex/ll1.stl"/>
+    <mesh file="simplified_convex/ll2.stl"/>
+    <mesh file="simplified_convex/ll3.stl"/>
+    <mesh file="simplified_convex/ll4.stl"/>
+    <mesh file="simplified_convex/ll5.stl"/>
+    <mesh file="simplified_convex/ll6.stl"/>
+    <mesh file="simplified_convex/rl1.stl"/>
+    <mesh file="simplified_convex/rl2.stl"/>
+    <mesh file="simplified_convex/rl3.stl"/>
+    <mesh file="simplified_convex/rl4.stl"/>
+    <mesh file="simplified_convex/rl5.stl"/>
+    <mesh file="simplified_convex/rl6.stl"/>
+    <mesh file="simplified_convex/la1.stl"/>
+    <mesh file="simplified_convex/la2.stl"/>
+    <mesh file="simplified_convex/la3.stl"/>
+    <mesh file="simplified_convex/ra1.stl"/>
+    <mesh file="simplified_convex/ra2.stl"/>
+    <mesh file="simplified_convex/ra3.stl"/>
+    <mesh file="simplified_convex/h1.stl"/>
+    <mesh file="simplified_convex/h2.stl"/>
     <mesh name="bodyc" file="simplified_convex/body.stl"/>
     <mesh name="body1c" file="simplified_convex/body_sub1.stl"/>
     <mesh name="body2c" file="simplified_convex/body_sub2.stl"/>
@@ -53,7 +53,7 @@
     <mesh name="h21c" file="simplified_convex/h2_sub1.stl"/>
     <mesh name="h22c" file="simplified_convex/h2_sub2.stl"/>
   </asset>
-
+<option noslip_iterations="1"></option>
   <default>
     <mesh scale="0.001 0.001 0.001"/>
     <geom type="mesh" solref=".004 1"/>
@@ -73,7 +73,7 @@
 
   <worldbody>
     <light mode="targetbodycom" target="torso_2023" pos="4 0 1"/>
-    <body name="torso_2023" pos="0 0 0.3">
+    <body name="torso_2023" >
       <inertial pos="-0.01501 0.00013 0.06582" quat="0.704708 0.704003 0.0667707 -0.0575246" mass="1.34928"
         diaginertia="0.00341264 0.00316574 0.00296931"/>
       <freejoint name="root" />
@@ -110,13 +110,13 @@
         <joint name="left_shoulder_pitch" axis="0 1 0"/>
         <geom mesh="la1" class="visual"/>
         <geom mesh="la1c" class="collision"/>
-        <body name="left_shoulder_roll" pos="0.019 0.0285 -0.01" >
+        <body name="left_shoulder_roll" pos="0.019 0.0285 -0.01" euler="-1.57 0 0" >
           <inertial pos="-0.01844 0.04514 0.00028" quat="0.501853 0.50038 -0.498173 0.499588" mass="0.17758"
             diaginertia="0.000234742 0.00022804 3.04183e-05"/>
           <joint name="left_shoulder_roll" axis="-1 0 0"/>
           <geom mesh="la2" class="visual"/>
           <geom mesh="la2c" class="collision"/>
-          <body name="left_elbow" pos="0 0.0904 -0.0001">
+          <body name="left_elbow"  pos="-0.02 0.0904 0.0201"  euler="0 -1.57 0 ">
             <inertial pos="-0.019 0.07033 0.0038" quat="0.483289 0.51617 -0.51617 0.483289" mass="0.04127"
               diaginertia="6.8785e-05 6.196e-05 1.2065e-05"/>
             <joint name="left_elbow" axis="1 0 0"/>
@@ -125,19 +125,19 @@
           </body>
         </body>
       </body>
-      <body name="right_shoulder_pitch" pos="-0.001 -0.06 0.111">
+      <body name="right_shoulder_pitch" pos="-0.001 -0.06 0.111"  >
         <inertial pos="0 -0.00823 -0.00233" quat="-0.244272 0.663575 -0.244272 0.663575" mass="0.01176"
           diaginertia="4.23401e-06 3.60599e-06 1.65e-06"/>
         <joint name="right_shoulder_pitch" axis="0 1 0"/>
         <geom mesh="ra1" class="visual"/>
         <geom mesh="ra1c" class="collision"/>
-        <body name="right_shoulder_roll" pos="0.019 -0.0285 -0.01" >
+        <body name="right_shoulder_roll" pos="0.019 -0.0285 -0.01" euler="1.57 0 0" >
           <inertial pos="-0.01844 -0.04514 0.00028" quat="0.50038 0.501853 -0.499588 0.498173" mass="0.17758"
             diaginertia="0.000234742 0.00022804 3.04183e-05"/>
-          <joint name="right_shoulder_roll" axis="-1 0 0"/>
-          <geom mesh="ra2" class="visual"/>
+          <joint name="right_shoulder_roll" axis="-1 0 0" />
+          <geom mesh="ra2" class="visual" />
           <geom mesh="ra2c" class="collision"/>
-          <body name="right_elbow" pos="0 -0.0904 -0.0001">
+          <body name="right_elbow" pos="-0.02 -0.0904 0.0201"  euler="0 -1.57 0 ">
             <inertial pos="-0.019 -0.07033 0.0038" quat="0.51617 0.483289 -0.483289 0.51617" mass="0.04127"
               diaginertia="6.8785e-05 6.196e-05 1.2065e-05"/>
             <joint name="right_elbow" axis="-1 0 0"/>
@@ -248,28 +248,28 @@
     </sensor>
 
   <actuator>
-    <position name="left_hip_roll" joint="left_hip_roll"/>
-    <position name="left_hip_pitch" joint="left_hip_pitch"/>
-    <position name="left_knee" joint="left_knee"/>
-    <position name="left_ankle_pitch" joint="left_ankle_pitch"/>
-    <position name="left_ankle_roll" joint="left_ankle_roll"/>
-    <position name="right_hip_roll" joint="right_hip_roll"/>
-    <position name="right_hip_pitch" joint="right_hip_pitch"/>
-    <position name="right_knee" joint="right_knee"/>
-    <position name="right_ankle_pitch" joint="right_ankle_pitch"/>
-    <position name="right_ankle_roll" joint="right_ankle_roll"/>
+    <position name="left_hip_roll" joint="left_hip_roll" ctrlrange="-0.785398 1.5708"/>
+    <position name="left_hip_pitch" joint="left_hip_pitch" ctrlrange="-2.35619 0.785398"/>
+    <position name="left_knee" joint="left_knee" ctrlrange=" 0 2.793"/>
+    <position name="left_ankle_pitch" joint="left_ankle_pitch" ctrlrange="-1.5708 0.785398"/>
+    <position name="left_ankle_roll" joint="left_ankle_roll" ctrlrange="-0.785398 0.785398"/>
+    <position name="right_hip_roll" joint="right_hip_roll" ctrlrange="-0.785398 1.5708"/>
+    <position name="right_hip_pitch" joint="right_hip_pitch" ctrlrange="-2.35619 0.785398"/>
+    <position name="right_knee" joint="right_knee" ctrlrange=" 0 2.793"/>
+    <position name="right_ankle_pitch" joint="right_ankle_pitch" ctrlrange="-1.5708 0.785398"/>
+    <position name="right_ankle_roll" joint="right_ankle_roll" ctrlrange="-0.785398 0.785398"/>
     <position name="head_yaw" joint="head_yaw"/>
     <position name="head_pitch" joint="head_pitch"/>
-    <position name="left_hip_yaw" joint="left_hip_yaw"/>
-    <position name="right_hip_yaw" joint="right_hip_yaw"/>
+    <position name="left_hip_yaw" joint="left_hip_yaw" ctrlrange="-1.309 0.524"/>
+    <position name="right_hip_yaw" joint="right_hip_yaw" ctrlrange="-1.309 0.524"/>
 
-    <position name="left_shoulder_pitch" joint="left_shoulder_pitch"/>
-    <position name="left_elbow" joint="left_elbow"/>
-    <position name="right_shoulder_pitch" joint="right_shoulder_pitch"/>
-    <position name="right_elbow" joint="right_elbow"/>
+    <position name="left_shoulder_pitch" joint="left_shoulder_pitch" ctrlrange="-3.92699 3.14159"/>
+    <position name="left_elbow" joint="left_elbow" ctrlrange="-3.14159 0"/>
+    <position name="right_shoulder_pitch" joint="right_shoulder_pitch" ctrlrange=" -3.92699 3.14159"/>
+    <position name="right_elbow" joint="right_elbow" ctrlrange="-3.14159 0"/>
 
-    <position name="left_shoulder_roll" joint="left_shoulder_roll"/>
-    <position name="right_shoulder_roll" joint="right_shoulder_roll"/>
+    <position name="left_shoulder_roll" joint="left_shoulder_roll" ctrlrange="0 1.5708"/>
+    <position name="right_shoulder_roll" joint="right_shoulder_roll" ctrlrange="0 1.5708"/>
 
   </actuator>
 </mujoco>

@@ -321,9 +321,16 @@ class Simulator:
 
 if __name__ == "__main__":
     sim = Simulator(scene_name="scene_sig.xml")
-    sim = Simulator(scene_name="scene_bez.xml")
+    # sim = Simulator(scene_name="scene_bez.xml")
+
     # sim = Simulator(scene_name="scene_bez3.xml")
     sim = Simulator(scene_name="scene_bez1.xml")
+
+    # sim = Simulator(scene_name="scene_bitbot.xml")
+
+    sim = Simulator(scene_name="scene_op3.xml")
+    sim = Simulator(scene_name="scene_g1.xml")
+    # sim = Simulator(scene_name="scene_nugus.xml") #euler="-1.57  0 0.2 "
     sim.step()
     sim.set_T_world_site("left_foot", np.eye(4))
 
@@ -339,9 +346,9 @@ if __name__ == "__main__":
         # print(sim.t)
         # sim.set_control("right_elbow", -1.2653655)
         dofs = ["elbow", "shoulder_pitch", "hip_pitch", "knee", "ankle_pitch"]
-        tt = "shoulder_pitch"
-        sim.set_control("right_"+tt, ran[count])
-        sim.set_control("left_"+tt, ran[count])
+        tt = "ankle_pitch"
+        # sim.set_control("right_"+tt, ran[count])
+        # sim.set_control("left_"+tt, ran[count])
         print(ran[count])
         ti += sim.dt
         if ti >= 0.03 and count < 99 and sim.t > 2:
@@ -403,6 +410,7 @@ if __name__ == "__main__":
         # left_foot = sim.get_T_world_site('left_foot')[2][3]
         # right_foot = sim.get_T_world_site('right_foot')[2][3]
         # foot = (left_foot+right_foot)/2
+        print(sim.get_rpy())
         print(sim.get_head_height())
         # print(foot)
         # head_height = np.linalg.norm(sim.get_T_world_site('camera')[0:3][:,3] - foot)

@@ -28,3 +28,15 @@ WARNING: Nan, Inf or huge value in QACC at DOF 0. The simulation is unstable. Ti
 Sat Apr 12 00:38:02 2025
 WARNING: Nan, Inf or huge value in QACC at DOF 18. The simulation is unstable. Time = 0.4560.
 
+Mon Apr 14 13:26:11 2025
+ERROR: Offscreen framebuffer is not complete, error 0x8cdd
+
+Mon Apr 14 14:41:58 2025
+ERROR: mjv_cameraInModel: mjvScene frustum_near too small
+
+Mon Apr 14 20:43:37 2025
+ERROR: Offscreen framebuffer is not complete, error 0x8cdd
+
+Mon Apr 14 20:43:44 2025
+ERROR: Offscreen framebuffer is not complete, error 0x8cdd
+
