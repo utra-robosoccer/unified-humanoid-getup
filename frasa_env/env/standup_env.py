@@ -69,20 +69,20 @@ class StandupEnv(gymnasium.Env):
         # self.folder_name = ["sig","bez","bez3", "op3"]
         # self.desired_height =[0.67, 0.54,0.62,0.49199]
 
-        self.scene_names = ["scene_sig.xml", "scene_bez.xml", "scene_bez3.xml", "scene_op3.xml", "scene_bez1.xml","scene_bitbot.xml"]
-        self.folder_name = ["sig", "bez", "bez3", "op3", "bez1","bitbot"]
-        self.desired_height = [0.67, 0.54, 0.62, 0.49199,0.48083660868911876, 0.7673033792122936]
+        # self.scene_names = ["scene_sig.xml", "scene_bez.xml", "scene_bez3.xml", "scene_op3.xml", "scene_bez1.xml","scene_bitbot.xml"]
+        # self.folder_name = ["sig", "bez", "bez3", "op3", "bez1","bitbot"]
+        # self.desired_height = [0.67, 0.54, 0.62, 0.49199,0.48083660868911876, 0.7673033792122936]
+
+        # self.scene_names = ["scene_sig.xml", "scene_bez.xml", "scene_bez3.xml", "scene_op3.xml", "scene_bez1.xml",
+        #                     "scene_bitbot.xml", "scene_nugus.xml"]
+        # self.folder_name = ["sig", "bez", "bez3", "op3", "bez1", "bitbot", "nugus"]
+        #
+        # self.desired_height = [0.67, 0.54, 0.62, 0.49199, 0.48083660868911876, 0.7673033792122936, 0.8086855785416924]
 
         self.scene_names = ["scene_sig.xml", "scene_bez.xml", "scene_bez3.xml", "scene_op3.xml", "scene_bez1.xml",
                             "scene_bitbot.xml", "scene_nugus.xml"]
         self.folder_name = ["sig", "bez", "bez3", "op3", "bez1", "bitbot", "nugus"]
-
-        self.desired_height = [0.67, 0.54, 0.62, 0.49199, 0.48083660868911876, 0.7673033792122936, 0.8086855785416924]
-
-        # self.scene_names = ["scene_sig.xml", "scene_bez.xml", "scene_bez3.xml", "scene_op3.xml", "scene_bez1.xml",
-        #                     "scene_bitbot.xml", "scene_nugus.xml", 'scene_.xml']
-        # self.folder_name = ["sig", "bez", "bez3", "op3", "bez1", "bitbot", "nugus",""]
-        # self.desired_height = [0.67, 0.54, 0.62, 0.49199, 0.48083660868911876, 0.7673033792122936, 0.8086855785416924, ]
+        self.desired_height = [0.67, 0.54, 0.62, 0.49199, 0.48083660868911876, 0.7673033792122936, 0.8086855785416924 ]
 
         # self.scene_names = ["scene_sig.xml", "scene_bez.xml", "scene_bez3.xml", "scene_op3.xml",
         #                     "scene_bitbot.xml"]
@@ -136,7 +136,8 @@ class StandupEnv(gymnasium.Env):
         self.dtilt_history = []
         self.dtilt_history_size = max(1, round(self.options["dtilt_delay"] / self.sim.dt))
 
-
+        self.accel_history = []
+        self.accel_history_size = max(1, round(self.options["tilt_delay"] / self.sim.dt))
 
     def get_indexes(self):
         self.ranges = [self.sim.model.actuator(f"left_{dof}").ctrlrange for dof in self.dofs]
@@ -183,6 +184,8 @@ class StandupEnv(gymnasium.Env):
                     *np.array([-np.pi, -np.pi, -np.pi]),
                     # dtilt (16)
                     *np.array([-10, -10, -10]),
+                    # accel
+                    *np.array([-40, -40, -40]),
                     # height (17)
                     0,
                     # Previous action
@@ -202,6 +205,8 @@ class StandupEnv(gymnasium.Env):
                     *np.array([np.pi, np.pi, np.pi]),
                     # dtilt (16)
                     *np.array([10, 10, 10]),
+                    # accel
+                    *np.array([40, 40, 40]),
                     # height (17)
                     1,
                     # Previous action
@@ -252,6 +257,7 @@ class StandupEnv(gymnasium.Env):
         # Tilt, dtilt
         tilt = self.tilt_history[0]
         dtilt = self.dtilt_history[0]
+        accel = self.accel_history[0]
 
         height = self.height_history[0]
 
@@ -264,6 +270,7 @@ class StandupEnv(gymnasium.Env):
                 *ctrl,
                 *tilt,
                 *dtilt,
+                *accel,
                 height,
                 *(np.array(self.previous_actions).flatten()),
             ],
@@ -322,6 +329,7 @@ class StandupEnv(gymnasium.Env):
             self.q_history.append(q)
             self.tilt_history.append(self.sim.get_rpy())
             self.dtilt_history.append(self.sim.get_gyro())
+            self.accel_history.append(self.sim.get_accel())
             self.height_history.append(self.sim.get_head_height())
 
             if self.render_mode == "human":
@@ -349,13 +357,14 @@ class StandupEnv(gymnasium.Env):
         self.tilt_history = self.tilt_history[-self.tilt_history_size :]
         self.dtilt_history = self.dtilt_history[-self.dtilt_history_size :]
         self.height_history = self.height_history[-self.height_history_size:]
+        self.accel_history = self.accel_history[-self.accel_history_size:]
         # Extracting observation
         obs = self.get_observation()
         state_current = [self.height_history[-1]]
         reward = np.exp(
             -10 * (np.linalg.norm(np.array(state_current) - np.array(self.options["desired_state"])) ** 2))
-        desired_height = self.desired_height[self.current_index]
-        if ((abs(desired_height - state_current[0]) / desired_height) * 100) < 10:
+        desired_height = 0.4#self.desired_height[self.current_index]
+        if state_current[0] >= desired_height:#((abs(desired_height - state_current[0]) / desired_height) * 100) < 10:
             reward += np.exp(
                 -10 * (np.linalg.norm(np.array([self.tilt_history[-1][1]]) - np.array([0])) ** 2))
         # print(f"PITCH: {np.rad2deg(self.tilt_history[-1][1])} Pitch2: {np.rad2deg(self.get_tilt())}")
@@ -482,7 +491,7 @@ class StandupEnv(gymnasium.Env):
             self.current_index= random.choice(range(len(self.scene_names)))
             self.count[self.current_index] +=1
             # print(self.count)
-            self.current_index = 6
+            # self.current_index = 4
             # self.current_index = (self.current_index + 1) % len(self.scene_names)
             new_scene = self.scene_names[self.current_index]
 
@@ -531,6 +540,7 @@ class StandupEnv(gymnasium.Env):
         self.tilt_history = [self.sim.get_rpy()] * self.tilt_history_size
         self.dtilt_history = [self.sim.get_gyro()] * self.dtilt_history_size
         self.height_history = [self.sim.get_head_height()] * self.height_history_size
+        self.accel_history = [self.sim.get_accel()] * self.accel_history_size
         # Initializing the previous action
         self.previous_actions = [np.zeros(len(self.dofs))] * self.options["previous_actions"]
 
