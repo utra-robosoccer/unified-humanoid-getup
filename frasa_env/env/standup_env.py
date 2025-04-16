@@ -39,8 +39,8 @@ class StandupEnv(gymnasium.Env):
             # Probability of seeding the robot in finale position
             "reset_final_p": 0.1,
             # Termination conditions
-            "terminate_upside_down": True,
-            "terminate_gyro": True,
+            "terminate_upside_down": False,
+            "terminate_gyro": False,
             "terminate_shock": False,
             # Randomization
             "random_angles": 1.5,  # [+- deg]
@@ -570,15 +570,25 @@ class StandupEnv(gymnasium.Env):
                 for i in self.stand_success_count:
                     for j in i:
                         tot.append(j)
+                tot2 = []
+                for i in self.tot_time_to_stand:
+                    for j in i:
+                        tot2.append(j)
                 print(f"Stand: {self.stand}, Stand time: {self.stand_time}")
-                print(f"Total Success Rate, Std, Chances: {np.mean(tot)},{np.std(tot)},{sum(tot)},{sum(self.init_pose)}"
+                print(f"Total Success Rate, Std, Chances,Avg stand time, std: {np.mean(tot)},{np.std(tot)},{sum(tot)},{sum(self.init_pose)},{np.mean(tot2)},{np.std(tot2)}"
                       )
                 if self.init_pose[0] > 0:
-                    print(f"Front Success Rate, Std, Chances: {np.mean(self.stand_success_count[0])},{np.std(self.stand_success_count[0])},{sum(self.stand_success_count[0])},{self.init_pose[0]}")
+                    print(f"Front Success Rate, Std, Chances,Avg stand time, std: {np.mean(self.stand_success_count[0])},"
+                          f"{np.std(self.stand_success_count[0])},{sum(self.stand_success_count[0])},{self.init_pose[0]},"
+                          f"{np.mean(self.tot_time_to_stand[0])},{np.std(self.tot_time_to_stand[0])}")
                 if self.init_pose[1] > 0:
-                    print(f"Back Success Rate, Std, Chances: {np.mean(self.stand_success_count[1])},{np.std(self.stand_success_count[1])},{sum(self.stand_success_count[1])},{self.init_pose[1]}")
+                    print(f"Back Success Rate, Std, Chances,Avg stand time, std: {np.mean(self.stand_success_count[1])},"
+                          f"{np.std(self.stand_success_count[1])},{sum(self.stand_success_count[1])},{self.init_pose[1]},"
+                          f"{np.mean(self.tot_time_to_stand[1])},{np.std(self.tot_time_to_stand[1])}")
                 if self.init_pose[2] > 0:
-                    print(f"Up Success Rate, Std, Chances: {np.mean(self.stand_success_count[2])},{np.std(self.stand_success_count[2])},{sum(self.stand_success_count[2])},{self.init_pose[2]}")
+                    print(f"Up Success Rate, Std, Chances,Avg stand time, std: {np.mean(self.stand_success_count[2])},"
+                          f"{np.std(self.stand_success_count[2])},{sum(self.stand_success_count[2])},{self.init_pose[2]},"
+                          f"{np.mean(self.tot_time_to_stand[2] )},{np.std(self.tot_time_to_stand[2])}")
 
                 if sum(tot) > 0:
                     tot = []
@@ -587,12 +597,12 @@ class StandupEnv(gymnasium.Env):
                             tot.append(j)
                     print(f"Total Avg stand time, std: {np.mean(tot)},{np.std(tot)}"
                           )
-                if sum(self.stand_success_count[0]) > 0:
-                    print(f"Front Avg stand time, std: {np.mean(self.tot_time_to_stand[0])},{np.std(self.tot_time_to_stand[0])}")
-                if sum(self.stand_success_count[1]) > 0:
-                    print(f"Back Avg stand time, std: {np.mean(self.tot_time_to_stand[1])},{np.std(self.tot_time_to_stand[1])}")
-                if sum(self.stand_success_count[2]) > 0:
-                    print(f"Up Avg stand time, std: {np.mean(self.tot_time_to_stand[2] )},{np.std(self.tot_time_to_stand[2])}")
+                # if sum(self.stand_success_count[0]) > 0:
+                #     print(f"Front Avg stand time, std: {np.mean(self.tot_time_to_stand[0])},{np.std(self.tot_time_to_stand[0])}")
+                # if sum(self.stand_success_count[1]) > 0:
+                #     print(f"Back Avg stand time, std: {np.mean(self.tot_time_to_stand[1])},{np.std(self.tot_time_to_stand[1])}")
+                # if sum(self.stand_success_count[2]) > 0:
+                #     print(f"Up Avg stand time, std: {np.mean(self.tot_time_to_stand[2] )},{np.std(self.tot_time_to_stand[2])}")
             self.n_ep += 1
         if self.multi:
             self.current_index= random.choice(range(len(self.scene_names)))
