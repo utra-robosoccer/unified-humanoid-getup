@@ -1,5 +1,5 @@
 <mujoco model="onshape">
-  <compiler angle="radian" meshdir="nugus"/>
+  <compiler angle="radian" meshdir="new"/>
   <default>
         <default class="mx106">
             <position kp="21" forcerange="-8 8" />
@@ -74,7 +74,7 @@
         <joint class="mx106-14" name="left_hip_roll" pos="0 0 0" axis="0 0 1"  />
         <geom type="mesh"  density="0" rgba="0.286275 0.286275 0.286275 1" mesh="left_hip_roll_visual"/>
 <!--        <geom size="0.0362265 0.02765 0.046925" pos="0.0211382 0.00135 -0.026825" type="box" rgba="0.286275 0.286275 0.286275 1"/>-->
-        <body name="left_hip_pitch" pos="0 0 0" euler="-1.57  0 0 ">
+        <body name="left_hip_pitch" pos="0 0 0" euler="-1.57  0 0.2 ">
           <inertial pos="0.144296 0.0401097 0.000258488" quat="0.48018 0.474915 0.52246 0.520498" mass="0.313357" diaginertia="0.00167304 0.00160068 0.000213115"/>
           <joint class="mx106-14" name="left_hip_pitch" pos="0 0 0" axis="0 0 1"  />
           <geom type="mesh"  density="0" rgba="0.286275 0.286275 0.286275 1" mesh="left_upper_leg_visual"/>
@@ -111,7 +111,7 @@
         <joint class="mx106-14" name="right_hip_roll" pos="0 0 0" axis="0 0 1"  />
         <geom type="mesh"  density="0" rgba="0.286275 0.286275 0.286275 1" mesh="right_hip_roll_visual"/>
 <!--        <geom size="0.0331382 0.02765 0.04705" pos="0.01805 -0.00315 -0.02695" type="box" rgba="0.286275 0.286275 0.286275 1"/>-->
-        <body name="right_hip_pitch" pos="0 0 0" euler="-1.57  0 0 ">
+        <body name="right_hip_pitch" pos="0 0 0" euler="-1.57  0 0.2 ">
           <inertial pos="0.144343 0.0400917 -0.000278506" quat="0.47021 0.473824 0.526501 0.526488" mass="0.313809" diaginertia="0.00167983 0.00160132 0.000207139"/>
           <joint class="mx106-14" name="right_hip_pitch" pos="0 0 0" axis="0 0 1"  />
           <geom type="mesh"  density="0" rgba="0.286275 0.286275 0.286275 1" mesh="right_upper_leg_visual"/>
@@ -155,12 +155,12 @@
         <site name="camera" pos="-0.06 0 0" />
       </body>
     </body>
-    <body name="left_shoulder" pos="0 0.077 0.17725" euler="-1.57 0 3.14">
+    <body name="left_shoulder_pitch" pos="0 0.077 0.17725" euler="-1.57 0 3.14">
       <inertial pos="-3.61374e-05 -0.00254925 0.0287427" quat="0.618495 0.346197 0.615355 0.344891" mass="0.0845502" diaginertia="9.98768e-05 9.09162e-05 7.30289e-05"/>
-      <joint class="mx64-14" name="left_shoulder_pitch" pos="0 0.0106 0.1616" axis="0 0 1"  />
+      <joint class="mx64-14" name="left_shoulder_pitch" pos="0 0 0" axis="0 0 1"  />
       <geom type="mesh"  density="0" rgba="0.286275 0.286275 0.286275 1" mesh="left_shoulder_visual"/>
 <!--      <geom size="0.04 0.040721 0.0396866" pos="0 -0.000721047 0.0396866" type="box" rgba="0.286275 0.286275 0.286275 1"/>-->
-      <body name="left_upper_arm" pos="0 -0.0100012 0.0479124" euler="1.57 -1.57 0.15">
+      <body name="left_shoulder_roll" pos="0 -0.0100012 0.0479124" euler="1.57 -1.57 0.15">
         <inertial pos="0.045902 0.000372495 9.27204e-06" quat="0.346504 0.576301 -0.375287 0.637943" mass="0.29923" diaginertia="0.00098868 0.000637586 0.000573833"/>
         <joint class="mx64-14" name="left_shoulder_roll" pos="0 0 0" axis="0 0 1"  />
         <geom type="mesh"  density="0" rgba="0.286275 0.286275 0.286275 1" mesh="left_upper_arm_visual"/>
@@ -173,12 +173,12 @@
         </body>
       </body>
     </body>
-    <body name="right_shoulder" pos="0 -0.077 0.17725" euler="-1.57 0 3.14">
+    <body name="right_shoulder_pitch" pos="0 -0.077 0.17725" euler="-1.57 0 3.14">
       <inertial pos="-3.46247e-05 -0.00254925 -0.0287427" quat="0.346201 0.618498 0.344878 0.615357" mass="0.0845501" diaginertia="9.98771e-05 9.09162e-05 7.3029e-05"/>
       <joint class="mx64-14" name="right_shoulder_pitch" pos="0 -0.0106 0.1616" axis="0 0 1"  />
       <geom type="mesh"  density="0" rgba="0.286275 0.286275 0.286275 1" mesh="right_shoulder_visual"/>
 <!--      <geom size="0.04 0.0407336 0.0396809" pos="0 -0.000733595 -0.0396809" type="box" rgba="0.286275 0.286275 0.286275 1"/>-->
-      <body name="right_upper_arm" pos="0 -0.0100012 -0.0479124" euler="1.57 -1.57 -0.15">
+      <body name="right_shoulder_roll" pos="0 -0.0100012 -0.0479124" euler="1.57 -1.57 -0.15">
         <inertial pos="0.0458986 -0.000371241 0.000118834" quat="0.327762 0.587042 -0.375964 0.637656" mass="0.299218" diaginertia="0.000988599 0.000640993 0.000570263"/>
         <joint class="mx64-14" name="right_shoulder_roll" pos="0 0 0" axis="0 0 -1"  />
         <geom type="mesh"  density="0" rgba="0.286275 0.286275 0.286275 1" mesh="right_upper_arm_visual"/>
@@ -204,6 +204,11 @@
 
         <exclude body1="left_ankle_roll" body2="left_knee"/>
     <exclude body1="right_ankle_roll" body2="right_knee"/>
+
+<!--      <exclude body1="left_shoulder_roll" body2="left_shoulder_pitch"/>-->
+<!--    <exclude body1="right_shoulder_roll" body2="right_shoulder_pitch"/>-->
+      <exclude body1="left_shoulder_roll" body2="torso_2023"/>
+    <exclude body1="right_shoulder_roll" body2="torso_2023"/>
   </contact>
 
   <actuator>

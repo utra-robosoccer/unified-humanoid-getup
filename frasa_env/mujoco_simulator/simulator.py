@@ -291,6 +291,7 @@ class Simulator:
             head_height = -10
         return head_height
 
+
     def get_rpy(self, site:str = "trunk") -> np.ndarray:
         R = self.data.site(site).xmat
         # pitch = np.arctan2(-R[6], np.sqrt(R[0] ** 2 + R[3] ** 2)) #
@@ -320,7 +321,7 @@ class Simulator:
                 self.viewer = None
 
 if __name__ == "__main__":
-    sim = Simulator(scene_name="scene_sig.xml")
+    # sim = Simulator(scene_name="scene_sig.xml")
     # sim = Simulator(scene_name="scene_bez.xml")
 
     # sim = Simulator(scene_name="scene_bez3.xml")
@@ -328,9 +329,8 @@ if __name__ == "__main__":
 
     # sim = Simulator(scene_name="scene_bitbot.xml")
 
-    sim = Simulator(scene_name="scene_op3.xml")
-    sim = Simulator(scene_name="scene_g1.xml")
-    # sim = Simulator(scene_name="scene_nugus.xml") #euler="-1.57  0 0.2 "
+    # sim = Simulator(scene_name="scene_op3.xml")
+    # sim = Simulator(scene_name="scene_nugus.xml") #euler="-1.57  0 0.2 "  left_hip_pitch
     sim.step()
     sim.set_T_world_site("left_foot", np.eye(4))
 

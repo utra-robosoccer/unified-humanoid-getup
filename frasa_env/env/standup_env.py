@@ -79,11 +79,14 @@ class StandupEnv(gymnasium.Env):
         #
         # self.desired_height = [0.67, 0.54, 0.62, 0.49199, 0.48083660868911876, 0.7673033792122936, 0.8086855785416924]
 
-        self.scene_names = ["scene_sig.xml", "scene_bez.xml", "scene_bez3.xml", "scene_op3.xml", "scene_bez1.xml",
-                            "scene_bitbot.xml", "scene_nugus.xml"]
-        self.folder_name = ["sig", "bez", "bez3", "op3", "bez1", "bitbot", "nugus"]
-        self.desired_height = [0.67, 0.54, 0.62, 0.49199, 0.48083660868911876, 0.7673033792122936, 0.8086855785416924 ]
+        # self.scene_names = ["scene_sig.xml", "scene_bez.xml", "scene_bez3.xml", "scene_op3.xml", "scene_bez1.xml",
+        #                     "scene_bitbot.xml", "scene_nugus.xml"]
+        # self.folder_name = ["sig", "bez", "bez3", "op3", "bez1", "bitbot", "nugus"]
+        # self.desired_height = [0.67, 0.54, 0.62, 0.49199, 0.48083660868911876, 0.7673033792122936, 0.8086855785416924 ]
 
+        # self.scene_names = ["scene_sig.xml", "scene_bez.xml", "scene_bez3.xml", "scene_op3.xml",
+        #                     "scene_bitbot.xml", "scene_nugus.xml"]
+        # self.folder_name = ["sig", "bez", "bez3", "op3", "bitbot", "nugus"]
         # self.scene_names = ["scene_sig.xml", "scene_bez.xml", "scene_bez3.xml", "scene_op3.xml",
         #                     "scene_bitbot.xml"]
         # self.folder_name = ["sig", "bez", "bez3", "op3", "bitbot"]
@@ -96,6 +99,20 @@ class StandupEnv(gymnasium.Env):
         # self.scene_names = ["scene_sig.xml", "scene_bez3.xml"]
         # self.folder_name = ["sig", "bez3"]
         # self.desired_height = [0.67, 0.62]
+
+        # self.scene_names = ["scene_sig.xml"]
+        # self.folder_name = ["sig"]
+        # self.scene_names = ["scene_bitbot.xml"]
+        # self.folder_name = ["bitbot"]
+        # self.scene_names = ["scene_nugus.xml"]
+        # self.folder_name = ["nugus"]
+        # self.scene_names = ["scene_bez1.xml"]
+        # self.folder_name = ["bez1"]
+        self.scene_names = ["scene_bez.xml", "scene_op3.xml", "scene_bez3.xml"]
+        self.folder_name = ["bez", "op3", "bez3"]
+        self.desired_height = [0.67, 0.54, 0.62]
+        self.scene_names = ["scene_op3.xml"]
+        self.folder_name = ["op3"]
 
         self.count = [0] * len(self.scene_names)
         self.current_index = 0
@@ -491,7 +508,7 @@ class StandupEnv(gymnasium.Env):
             self.current_index= random.choice(range(len(self.scene_names)))
             self.count[self.current_index] +=1
             # print(self.count)
-            self.current_index = 6
+            # self.current_index = 6
             # self.current_index = (self.current_index + 1) % len(self.scene_names)
             new_scene = self.scene_names[self.current_index]
 
