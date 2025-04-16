@@ -241,7 +241,7 @@ def enjoy2() -> None:  # noqa: C901
         if tqdm is None:
             raise ImportError("Please install tqdm and rich to use the progress bar")
         generator = tqdm(generator)
-    n_ep = 100
+    n_ep = 30
     ep = 0
     try:
         while ep < n_ep:
@@ -300,7 +300,7 @@ def enjoy2() -> None:  # noqa: C901
 
     if args.verbose > 0 and len(episode_rewards) > 0:
         print(f"{len(episode_rewards)} Episodes")
-        print(f"Mean reward: {np.mean(episode_rewards):.2f} +/- {np.std(episode_rewards):.2f}")
+        print(f"Mean reward: {np.mean(episode_rewards):.2f},{np.std(episode_rewards):.2f}")
 
     if args.verbose > 0 and len(episode_lengths) > 0:
         print(f"Mean episode length: {np.mean(episode_lengths):.2f} +/- {np.std(episode_lengths):.2f}")
