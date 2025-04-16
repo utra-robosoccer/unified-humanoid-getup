@@ -16,6 +16,7 @@ class StandupEnv(gymnasium.Env):
     metadata = {"render_modes": ["human", "none"], "render_fps": 30}
 
     def __init__(self, render_mode="none", options: Optional[dict] = None, evaluation: bool = False):
+
         self.options = {
             # Duration of the stabilization pre-simulation (waiting for the gravity to stabilize the robot) [s]
             "stabilization_time": 2.0,
@@ -62,7 +63,6 @@ class StandupEnv(gymnasium.Env):
             "previous_actions": 1,
         }
         self.options.update(options or {})
-        self.multi = True
         self.render_mode = render_mode
 
         # self.scene_names = ["scene_sig.xml", "scene_bez.xml", "scene_bez3.xml","scene_op3.xml" ]
@@ -106,13 +106,38 @@ class StandupEnv(gymnasium.Env):
         # self.folder_name = ["bitbot"]
         # self.scene_names = ["scene_nugus.xml"]
         # self.folder_name = ["nugus"]
-        # self.scene_names = ["scene_bez1.xml"]
-        # self.folder_name = ["bez1"]
-        self.scene_names = ["scene_bez.xml", "scene_op3.xml", "scene_bez3.xml"]
-        self.folder_name = ["bez", "op3", "bez3"]
-        self.desired_height = [0.67, 0.54, 0.62]
-        self.scene_names = ["scene_op3.xml"]
-        self.folder_name = ["op3"]
+        # self.scene_names = ["scene_bez3.xml"]
+        # self.folder_name = ["bez3"]
+        # self.scene_names = ["scene_bez1.xml", "scene_nugus.xml", "scene_bez3.xml"]
+        # self.folder_name = ["bez1", "nugus", "bez3"]
+        # self.desired_height = [0.67, 0.54, 0.62]
+        # self.scene_names = ["scene_op3.xml"]
+        # self.folder_name = ["op3"]
+        # self.scene_names = ["scene_sig.xml", "scene_bez.xml", "scene_op3.xml", "scene_bez1.xml",
+        #                     "scene_bitbot.xml", "scene_nugus.xml"]
+        # self.folder_name = ["sig", "bez", "op3", "bez1", "bitbot", "nugus"]
+        self.scene_names = ["scene_sig.xml"]
+        self.folder_name = ["sig"]
+        # self.scene_names = ["scene_bitbot.xml"]
+        # self.folder_name = ["bitbot"]
+        # self.scene_names = ["scene_nugus.xml"]
+        # self.folder_name = ["nugus"]
+
+        self.multi = True
+        self.record = True
+        self.stand = False
+        self.stand_time = float("inf")
+
+        self.pose_init = "none"
+
+        self.stand_success_count = [[], [], []]  # all, Front, back, side
+        self.n_ep = -1
+        self.tot_time_to_stand = [[], [], []]
+        self.init_pose = [0, 0, 0]  # Front, back, side
+        self.desired_height = 0.67
+        # self.desired_height = [0.67, 0.54, 0.62, 0.49199, 0.48083660868911876, 0.7673033792122936, 0.8086855785416924 ]
+        # self.folder_name = ["sig", "bez", "bez3", "op3", "bez1", "bitbot", "nugus"]
+
 
         self.count = [0] * len(self.scene_names)
         self.current_index = 0
@@ -155,6 +180,7 @@ class StandupEnv(gymnasium.Env):
 
         self.accel_history = []
         self.accel_history_size = max(1, round(self.options["tilt_delay"] / self.sim.dt))
+
 
     def get_indexes(self):
         self.ranges = [self.sim.model.actuator(f"left_{dof}").ctrlrange for dof in self.dofs]
@@ -296,7 +322,6 @@ class StandupEnv(gymnasium.Env):
 
     def step(self, action):
         action = np.array(action)
-
         # Current control
         start_ctrl = [self.sim.get_control(f"left_{dof}") for dof in self.dofs]
 
@@ -321,7 +346,7 @@ class StandupEnv(gymnasium.Env):
 
         # Limiting the control to the range
         target_ctrl = np.clip(target_ctrl, self.range_low, self.range_high)
-
+        # print(np.rad2deg(self.sim.get_rpy()))
         # Not terminating episode
         done = False
         shock = False
@@ -375,6 +400,16 @@ class StandupEnv(gymnasium.Env):
         self.dtilt_history = self.dtilt_history[-self.dtilt_history_size :]
         self.height_history = self.height_history[-self.height_history_size:]
         self.accel_history = self.accel_history[-self.accel_history_size:]
+        # print(f"Height: {self.height_history[-1]},  Pitch: {self.sim.get_rpy()[1]}")
+        if self.record:
+            if ((abs(self.desired_height - self.height_history[-1]) / self.desired_height) * 100) < 10:
+                if not self.stand:
+                    self.stand_time = self.sim.t
+                self.stand = True
+            elif self.stand and ((abs(self.desired_height - self.height_history[-1]) / self.desired_height) * 100) > 10:
+                self.stand = False
+                self.stand_time=float("inf")
+
         # Extracting observation
         obs = self.get_observation()
         state_current = [self.height_history[-1]]
@@ -504,6 +539,52 @@ class StandupEnv(gymnasium.Env):
         options: Optional[dict] = None,
     ):
         super().reset(seed=seed)
+        if self.record:
+            print(f"Ep: {self.n_ep}")
+            if self.stand:
+                if self.pose_init == "front":
+                    self.tot_time_to_stand[0].append(self.stand_time)
+                elif self.pose_init == "back":
+                    self.tot_time_to_stand[1].append(self.stand_time)
+                elif self.pose_init == "up":
+                    self.tot_time_to_stand[2].append(self.stand_time)
+
+            if self.pose_init == "front":
+                self.stand_success_count[0].append(int(self.stand))
+            elif self.pose_init == "back":
+                self.stand_success_count[1].append(int(self.stand))
+            elif self.pose_init == "up":
+                self.stand_success_count[2].append(int(self.stand))
+            # print(self.init_pose)
+            if self.n_ep >= 0:
+                tot = []
+                for i in self.stand_success_count:
+                    for j in i:
+                        tot.append(j)
+                print(f"Stand: {self.stand}, Stand time: {self.stand_time}")
+                print(f"Total Success Rate: {np.mean(tot)}, Std: {np.std(tot)} Chances: {sum(tot)}/{sum(self.init_pose)}"
+                      )
+                if self.init_pose[0] > 0:
+                    print(f"Front Success Rate: {np.mean(self.stand_success_count[0])}, Std: {np.std(self.stand_success_count[0])}, Chances:  {sum(self.stand_success_count[0])}/{self.init_pose[0]}")
+                if self.init_pose[1] > 0:
+                    print(f"Back Success Rate: {np.mean(self.stand_success_count[1])}, Std: {np.std(self.stand_success_count[1])}, Chances:  {sum(self.stand_success_count[1])}/{self.init_pose[1]}")
+                if self.init_pose[2] > 0:
+                    print(f"Up Success Rate: {np.mean(self.stand_success_count[2])}, Std: {np.std(self.stand_success_count[2])}, Chances:  {sum(self.stand_success_count[2])}/{self.init_pose[2]}")
+
+                if sum(tot) > 0:
+                    tot = []
+                    for i in self.tot_time_to_stand:
+                        for j in i:
+                            tot.append(j)
+                    print(f"Total Avg stand time: {np.mean(tot)}, Std: {np.std(tot)}"
+                          )
+                if sum(self.stand_success_count[0]) > 0:
+                    print(f"Front Avg stand time: {np.mean(self.tot_time_to_stand[0])}, Std: {np.std(self.tot_time_to_stand[0])}")
+                if sum(self.stand_success_count[1]) > 0:
+                    print(f"Back Avg stand time: {np.mean(self.tot_time_to_stand[1])}, Std: {np.std(self.tot_time_to_stand[1])}")
+                if sum(self.stand_success_count[2]) > 0:
+                    print(f"Up Avg stand time: {np.mean(self.tot_time_to_stand[2] )}, Std: {np.std(self.tot_time_to_stand[2])}")
+            self.n_ep += 1
         if self.multi:
             self.current_index= random.choice(range(len(self.scene_names)))
             self.count[self.current_index] +=1
@@ -562,6 +643,18 @@ class StandupEnv(gymnasium.Env):
         self.previous_actions = [np.zeros(len(self.dofs))] * self.options["previous_actions"]
 
         self.centroidal_force = self.sim.centroidal_force()
+
+        if self.record:
+            pitch = np.rad2deg(self.sim.get_rpy()[1])
+            if pitch > 30:
+                self.init_pose[0] += 1# [0, 0, 0]  # Front, back, up
+                self.pose_init = "front"
+            elif pitch < -30:
+                self.init_pose[1] += 1# [0, 0, 0]  # Front, back, up
+                self.pose_init = "back"
+            else:
+                self.init_pose[2] += 1
+                self.pose_init = "up"
 
         return self.get_observation(), {}
 
