@@ -241,7 +241,7 @@ def enjoy2() -> None:  # noqa: C901
         if tqdm is None:
             raise ImportError("Please install tqdm and rich to use the progress bar")
         generator = tqdm(generator)
-    n_ep = 700
+    n_ep = 100
     ep = 0
     try:
         while ep < n_ep:
