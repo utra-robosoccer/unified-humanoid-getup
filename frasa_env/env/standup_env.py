@@ -125,10 +125,10 @@ class StandupEnv(gymnasium.Env):
         # self.folder_name = ["bez"]
         # self.scene_names = ["scene_bez3.xml"]
         # self.folder_name = ["bez3"]
-        # self.scene_names = ["scene_sig.xml"]
-        # self.folder_name = ["sig"]
-        # self.scene_names = ["scene_bitbot.xml"]
-        # self.folder_name = ["bitbot"]
+        self.scene_names = ["scene_sig.xml"]
+        self.folder_name = ["sig"]
+        self.scene_names = ["scene_bitbot.xml"]
+        self.folder_name = ["bitbot"]
         # self.scene_names = ["scene_nugus.xml"]
         # self.folder_name = ["nugus"]
 
@@ -564,6 +564,7 @@ class StandupEnv(gymnasium.Env):
                 self.stand_success_count[2].append(int(self.stand))
             # print(self.init_pose)
             if self.n_ep >= 0:
+                print(self.folder_name[0])
                 tot = []
                 for i in self.stand_success_count:
                     for j in i:
@@ -573,34 +574,22 @@ class StandupEnv(gymnasium.Env):
                     for j in i:
                         tot2.append(j)
                 print(f"Stand: {self.stand}, Stand time: {self.stand_time}")
-                print(f"Total Success Rate, Std, Chances,Avg stand time, std: {np.mean(tot)},{np.std(tot)},{sum(tot)},{sum(self.init_pose)},{np.mean(tot2)},{np.std(tot2)}"
+                print(f"{np.mean(tot)},{np.std(tot)},{sum(tot)},{sum(self.init_pose)},{np.mean(tot2)},{np.std(tot2)}"
                       )
                 if self.init_pose[0] > 0:
-                    print(f"Front Success Rate, Std, Chances,Avg stand time, std: {np.mean(self.stand_success_count[0])},"
+                    print(f"{np.mean(self.stand_success_count[0])},"
                           f"{np.std(self.stand_success_count[0])},{sum(self.stand_success_count[0])},{self.init_pose[0]},"
                           f"{np.mean(self.tot_time_to_stand[0])},{np.std(self.tot_time_to_stand[0])}")
                 if self.init_pose[1] > 0:
-                    print(f"Back Success Rate, Std, Chances,Avg stand time, std: {np.mean(self.stand_success_count[1])},"
+                    print(f"{np.mean(self.stand_success_count[1])},"
                           f"{np.std(self.stand_success_count[1])},{sum(self.stand_success_count[1])},{self.init_pose[1]},"
                           f"{np.mean(self.tot_time_to_stand[1])},{np.std(self.tot_time_to_stand[1])}")
                 if self.init_pose[2] > 0:
-                    print(f"Up Success Rate, Std, Chances,Avg stand time, std: {np.mean(self.stand_success_count[2])},"
+                    print(f"{np.mean(self.stand_success_count[2])},"
                           f"{np.std(self.stand_success_count[2])},{sum(self.stand_success_count[2])},{self.init_pose[2]},"
-                          f"{np.mean(self.tot_time_to_stand[2] )},{np.std(self.tot_time_to_stand[2])}")
+                          f"{np.mean(self.tot_time_to_stand[2])},{np.std(self.tot_time_to_stand[2])}")
 
-                if sum(tot) > 0:
-                    tot = []
-                    for i in self.tot_time_to_stand:
-                        for j in i:
-                            tot.append(j)
-                    print(f"Total Avg stand time, std: {np.mean(tot)},{np.std(tot)}"
-                          )
-                # if sum(self.stand_success_count[0]) > 0:
-                #     print(f"Front Avg stand time, std: {np.mean(self.tot_time_to_stand[0])},{np.std(self.tot_time_to_stand[0])}")
-                # if sum(self.stand_success_count[1]) > 0:
-                #     print(f"Back Avg stand time, std: {np.mean(self.tot_time_to_stand[1])},{np.std(self.tot_time_to_stand[1])}")
-                # if sum(self.stand_success_count[2]) > 0:
-                #     print(f"Up Avg stand time, std: {np.mean(self.tot_time_to_stand[2] )},{np.std(self.tot_time_to_stand[2])}")
+
             self.n_ep += 1
         if self.multi:
             self.current_index= random.choice(range(len(self.scene_names)))
