@@ -39,8 +39,8 @@ class StandupEnv(gymnasium.Env):
             # Probability of seeding the robot in finale position
             "reset_final_p": 0.1,
             # Termination conditions
-            "terminate_upside_down": False,
-            "terminate_gyro": False,
+            "terminate_upside_down": True,
+            "terminate_gyro": True,
             "terminate_shock": False,
             # Randomization
             "random_angles": 1.5,  # [+- deg]
@@ -127,10 +127,14 @@ class StandupEnv(gymnasium.Env):
         # self.folder_name = ["bez3"]
         self.scene_names = ["scene_sig.xml"]
         self.folder_name = ["sig"]
-        # self.scene_names = ["scene_bitbot.xml"]
-        # self.folder_name = ["bitbot"]
+        self.scene_names = ["scene_sig.xml", "scene_bitbot.xml"]
+        self.folder_name = ["sig","bitbot"]
         # self.scene_names = ["scene_nugus.xml"]
         # self.folder_name = ["nugus"]
+
+        self.scene_names = ["scene_bez1.xml","scene_op3.xml","scene_bez.xml", "scene_bez3.xml","scene_sig.xml",
+                            "scene_bitbot.xml", "scene_nugus.xml"]
+        self.folder_name = ["bez1", "op3", "bez", "bez3","sig",  "bitbot", "nugus"]
 
         self.multi = True
         self.record = True
@@ -138,16 +142,23 @@ class StandupEnv(gymnasium.Env):
         self.stand_time = float("inf")
 
         self.pose_init = "none"
+        self.stand_success_count = {}
+        self.tot_time_to_stand = {}
+        self.init_pose = {}  # Front, back, side
+        for i in self.folder_name:
+            self.stand_success_count[i] = [[], [], []]# all, Front, back, side
+            self.tot_time_to_stand[i] = [[], [], []]
+            self.init_pose[i] = [0, 0, 0]  # Front, back, side
 
-        self.stand_success_count = [[], [], []]  # all, Front, back, side
-        self.n_ep = -1
-        self.tot_time_to_stand = [[], [], []]
-        self.init_pose = [0, 0, 0]  # Front, back, side
-        self.hei = {"sig":0.67, "bez":0.54, "bez3":0.62, "op3":0.49199, "bez1":0.48083660868911876, "bitbot":0.7673033792122936, "nugus":0.8086855785416924}
-        self.desired_height = self.hei[self.folder_name[0]]
+        # self.stand_success_count = {[[], [], []]}  # all, Front, back, side
+        self.n_ep = 0
+        self.current_index = 0
+        # self.tot_time_to_stand = [[], [], []]
+        # self.init_pose = [0, 0, 0]  # Front, back, side
+        self.hei = {"sig":0.67, "bez":0.54, "bez3":0.62, "op3":0.49199, "bez1":0.42083660868911876, "bitbot":0.7673033792122936, "nugus":0.8086855785416924}
+        self.desired_height = self.hei[self.folder_name[self.current_index]]
 
         self.count = [0] * len(self.scene_names)
-        self.current_index = 0
         self.sim = Simulator(scene_name=self.scene_names[self.current_index])
 
         # Loading initial configuration cache
@@ -409,11 +420,11 @@ class StandupEnv(gymnasium.Env):
         self.accel_history = self.accel_history[-self.accel_history_size:]
         # print(f"Height: {self.height_history[-1]},  Pitch: {self.sim.get_rpy()[1]}")
         if self.record:
-            if ((abs(self.desired_height - self.height_history[-1]) / self.desired_height) * 100) < 10:
+            if ((abs(self.desired_height - self.height_history[-1]) / self.desired_height) * 100) < 20:
                 if not self.stand:
                     self.stand_time = self.sim.t
                 self.stand = True
-            elif self.stand and ((abs(self.desired_height - self.height_history[-1]) / self.desired_height) * 100) > 10:
+            elif self.stand and ((abs(self.desired_height - self.height_history[-1]) / self.desired_height) * 100) > 20:
                 self.stand = False
                 self.stand_time=float("inf")
 
@@ -548,53 +559,52 @@ class StandupEnv(gymnasium.Env):
         super().reset(seed=seed)
         if self.record:
             print(f"Ep: {self.n_ep}")
+            self.desired_height = self.hei[self.folder_name[self.current_index]]
             if self.stand:
                 if self.pose_init == "front":
-                    self.tot_time_to_stand[0].append(self.stand_time)
+                    self.tot_time_to_stand[self.folder_name[self.current_index]][0].append(self.stand_time)
                 elif self.pose_init == "back":
-                    self.tot_time_to_stand[1].append(self.stand_time)
+                    self.tot_time_to_stand[self.folder_name[self.current_index]][1].append(self.stand_time)
                 elif self.pose_init == "up":
-                    self.tot_time_to_stand[2].append(self.stand_time)
+                    self.tot_time_to_stand[self.folder_name[self.current_index]][2].append(self.stand_time)
 
             if self.pose_init == "front":
-                self.stand_success_count[0].append(int(self.stand))
+                self.stand_success_count[self.folder_name[self.current_index]][0].append(int(self.stand))
             elif self.pose_init == "back":
-                self.stand_success_count[1].append(int(self.stand))
+                self.stand_success_count[self.folder_name[self.current_index]][1].append(int(self.stand))
             elif self.pose_init == "up":
-                self.stand_success_count[2].append(int(self.stand))
+                self.stand_success_count[self.folder_name[self.current_index]][2].append(int(self.stand))
             # print(self.init_pose)
-            if self.n_ep >= 0:
-                tot = []
-                for i in self.stand_success_count:
-                    for j in i:
-                        tot.append(j)
-                tot2 = []
-                for i in self.tot_time_to_stand:
-                    for j in i:
-                        tot2.append(j)
-                print(f"Stand: {self.stand}, Stand time: {self.stand_time}")
-                print(f"Total Success Rate, Std, Chances,Avg stand time, std: {np.mean(tot)},{np.std(tot)},{sum(tot)},{sum(self.init_pose)},{np.mean(tot2)},{np.std(tot2)}"
-                      )
-                if self.init_pose[0] > 0:
-                    print(f"Front Success Rate, Std, Chances,Avg stand time, std: {np.mean(self.stand_success_count[0])},"
-                          f"{np.std(self.stand_success_count[0])},{sum(self.stand_success_count[0])},{self.init_pose[0]},"
-                          f"{np.mean(self.tot_time_to_stand[0])},{np.std(self.tot_time_to_stand[0])}")
-                if self.init_pose[1] > 0:
-                    print(f"Back Success Rate, Std, Chances,Avg stand time, std: {np.mean(self.stand_success_count[1])},"
-                          f"{np.std(self.stand_success_count[1])},{sum(self.stand_success_count[1])},{self.init_pose[1]},"
-                          f"{np.mean(self.tot_time_to_stand[1])},{np.std(self.tot_time_to_stand[1])}")
-                if self.init_pose[2] > 0:
-                    print(f"Up Success Rate, Std, Chances,Avg stand time, std: {np.mean(self.stand_success_count[2])},"
-                          f"{np.std(self.stand_success_count[2])},{sum(self.stand_success_count[2])},{self.init_pose[2]},"
-                          f"{np.mean(self.tot_time_to_stand[2] )},{np.std(self.tot_time_to_stand[2])}")
-
-                if sum(tot) > 0:
+            if self.n_ep % 100 == 0 and self.n_ep > 0:
+                self.current_index +=1
+            if self.n_ep%700 == 0 and self.n_ep > 0:
+                for current_index in range(len(self.folder_name)):
+                    print(self.folder_name[current_index])
                     tot = []
-                    for i in self.tot_time_to_stand:
+                    for i in self.stand_success_count[self.folder_name[current_index]]:
                         for j in i:
                             tot.append(j)
-                    print(f"Total Avg stand time, std: {np.mean(tot)},{np.std(tot)}"
+                    tot2 = []
+                    for i in self.tot_time_to_stand[self.folder_name[current_index]]:
+                        for j in i:
+                            tot2.append(j)
+                    print(f"Stand: {self.stand}, Stand time: {self.stand_time}")
+                    print(f"Total Success Rate, Std, Chances,Avg stand time, std: {np.mean(tot)},{np.std(tot)},{sum(tot)},{sum(self.init_pose[self.folder_name[current_index]])},{np.mean(tot2)},{np.std(tot2)}"
                           )
+                    if self.init_pose[self.folder_name[current_index]][0] > 0:
+                        print(f"Front Success Rate, Std, Chances,Avg stand time, std: {np.mean(self.stand_success_count[self.folder_name[current_index]][0])},"
+                              f"{np.std(self.stand_success_count[self.folder_name[current_index]][0])},{sum(self.stand_success_count[self.folder_name[current_index]][0])},{self.init_pose[self.folder_name[current_index]][0]},"
+                              f"{np.mean(self.tot_time_to_stand[self.folder_name[current_index]][0])},{np.std(self.tot_time_to_stand[self.folder_name[current_index]][0])}")
+                    if self.init_pose[self.folder_name[current_index]][1] > 0:
+                        print(f"Back Success Rate, Std, Chances,Avg stand time, std: {np.mean(self.stand_success_count[self.folder_name[current_index]][1])},"
+                              f"{np.std(self.stand_success_count[self.folder_name[current_index]][1])},{sum(self.stand_success_count[self.folder_name[current_index]][1])},{self.init_pose[self.folder_name[current_index]][1]},"
+                              f"{np.mean(self.tot_time_to_stand[self.folder_name[current_index]][1])},{np.std(self.tot_time_to_stand[self.folder_name[current_index]][1])}")
+                    if self.init_pose[self.folder_name[current_index]][2] > 0:
+                        print(f"Up Success Rate, Std, Chances,Avg stand time, std: {np.mean(self.stand_success_count[self.folder_name[current_index]][2])},"
+                              f"{np.std(self.stand_success_count[self.folder_name[current_index]][2])},{sum(self.stand_success_count[self.folder_name[current_index]][2])},{self.init_pose[self.folder_name[current_index]][2]},"
+                              f"{np.mean(self.tot_time_to_stand[self.folder_name[current_index]][2] )},{np.std(self.tot_time_to_stand[self.folder_name[current_index]][2])}")
+
+
                 # if sum(self.stand_success_count[0]) > 0:
                 #     print(f"Front Avg stand time, std: {np.mean(self.tot_time_to_stand[0])},{np.std(self.tot_time_to_stand[0])}")
                 # if sum(self.stand_success_count[1]) > 0:
@@ -602,8 +612,9 @@ class StandupEnv(gymnasium.Env):
                 # if sum(self.stand_success_count[2]) > 0:
                 #     print(f"Up Avg stand time, std: {np.mean(self.tot_time_to_stand[2] )},{np.std(self.tot_time_to_stand[2])}")
             self.n_ep += 1
+
         if self.multi:
-            self.current_index= random.choice(range(len(self.scene_names)))
+            # self.current_index= random.choice(range(len(self.scene_names)))
             self.count[self.current_index] +=1
             # print(self.count)
             # self.current_index = 6
@@ -664,13 +675,13 @@ class StandupEnv(gymnasium.Env):
         if self.record:
             pitch = np.rad2deg(self.sim.get_rpy()[1])
             if pitch > 30:
-                self.init_pose[0] += 1# [0, 0, 0]  # Front, back, up
+                self.init_pose[self.folder_name[self.current_index]][0] += 1# [0, 0, 0]  # Front, back, up
                 self.pose_init = "front"
             elif pitch < -30:
-                self.init_pose[1] += 1# [0, 0, 0]  # Front, back, up
+                self.init_pose[self.folder_name[self.current_index]][1] += 1# [0, 0, 0]  # Front, back, up
                 self.pose_init = "back"
             else:
-                self.init_pose[2] += 1
+                self.init_pose[self.folder_name[self.current_index]][2] += 1
                 self.pose_init = "up"
 
         return self.get_observation(), {}
