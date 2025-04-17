@@ -49,7 +49,7 @@ def enjoy2() -> None:  # noqa: C901
     parser.add_argument("--exp-id", help="Experiment ID (default: 0: latest, -1: no exp folder)", default=0, type=int)
     parser.add_argument("--verbose", help="Verbose mode (0: no output, 1: INFO)", default=1, type=int)
     parser.add_argument(
-        "--no-render", action="store_true", default=False, help="Do not render the environment (useful for tests)"
+        "--no-render", action="store_true", default=True, help="Do not render the environment (useful for tests)"
     )
     parser.add_argument("--deterministic", action="store_true", default=False, help="Use deterministic actions")
     parser.add_argument("--device", help="PyTorch device to be use (ex: cpu, cuda...)", default="auto", type=str)
@@ -180,7 +180,7 @@ def enjoy2() -> None:  # noqa: C901
         stats_path=maybe_stats_path,
         seed=args.seed,
         log_dir=log_dir,
-        should_render=not args.no_render,
+        should_render= not args.no_render,
         hyperparams=hyperparams,
         env_kwargs=env_kwargs,
     )
@@ -241,7 +241,7 @@ def enjoy2() -> None:  # noqa: C901
         if tqdm is None:
             raise ImportError("Please install tqdm and rich to use the progress bar")
         generator = tqdm(generator)
-    n_ep = 30
+    n_ep = 100
     ep = 0
     try:
         while ep < n_ep:
@@ -254,7 +254,7 @@ def enjoy2() -> None:  # noqa: C901
             obs, reward, done, infos = env.step(action)
 
             episode_start = done
-
+            # env.render("none")
             if not args.no_render:
                 env.render("human")
 

@@ -125,8 +125,8 @@ class StandupEnv(gymnasium.Env):
         # self.folder_name = ["bez"]
         # self.scene_names = ["scene_bez3.xml"]
         # self.folder_name = ["bez3"]
-        # self.scene_names = ["scene_sig.xml"]
-        # self.folder_name = ["sig"]
+        self.scene_names = ["scene_sig.xml"]
+        self.folder_name = ["sig"]
         # self.scene_names = ["scene_bitbot.xml"]
         # self.folder_name = ["bitbot"]
         # self.scene_names = ["scene_nugus.xml"]
@@ -143,10 +143,8 @@ class StandupEnv(gymnasium.Env):
         self.n_ep = -1
         self.tot_time_to_stand = [[], [], []]
         self.init_pose = [0, 0, 0]  # Front, back, side
-        self.desired_height = 0.49199
-        # self.desired_height = [0.67, 0.54, 0.62, 0.49199, 0.48083660868911876, 0.7673033792122936, 0.8086855785416924 ]
-        # self.folder_name = ["sig", "bez", "bez3", "op3", "bez1", "bitbot", "nugus"]
-
+        self.hei = {"sig":0.67, "bez":0.54, "bez3":0.62, "op3":0.49199, "bez1":0.48083660868911876, "bitbot":0.7673033792122936, "nugus":0.8086855785416924}
+        self.desired_height = self.hei[self.folder_name[0]]
 
         self.count = [0] * len(self.scene_names)
         self.current_index = 0
