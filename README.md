@@ -1,5 +1,9 @@
 
-# FRASA: Fall Recovery And Stand up Agent
+# Unified Humanoid Get-Up (fork of FRASA)
+
+This repo contains the code for the RoboCup 2025 paper
+**Learning to Get Up Across Morphologies: Zero-Shot Recovery with a Unified Humanoid Policy**.
+It extends FRASA by …
 
 This repository contains the code to train the **Fall Recovery And Stand-up Agent (FRASA)** using reinforcement learning (RL) algorithms. Training is conducted in a *MuJoCo* environment with the *stable-baselines3* library. The agent is designed to recover from falls and stand up from both prone and supine positions.
 
