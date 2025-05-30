@@ -30,7 +30,7 @@ Then, you can install frasa-env from source using the following command:
 pip install -e .
 ```
 https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=Ubuntu&target_version=22.04&target_type=deb_network 
-pip install --upgrade "jax[cuda12_local]"
+pip install --upgrade "jax[cuda12_local]==0.5.3"
 sudo apt install nvidia-cudnn
 ### Issue with MuJoCo using Wayland
 

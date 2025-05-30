@@ -62,6 +62,7 @@ class StandupEnv(gymnasium.Env):
             # Previous actions
             "previous_actions": 1,
         }
+
         self.options.update(options or {})
         self.render_mode = render_mode
 
@@ -123,8 +124,8 @@ class StandupEnv(gymnasium.Env):
         # self.folder_name = ["op3"]
         # self.scene_names = ["scene_bez.xml"]
         # self.folder_name = ["bez"]
-        # self.scene_names = ["scene_bez3.xml"]
-        # self.folder_name = ["bez3"]
+        self.scene_names = ["scene_bez3.xml"]
+        self.folder_name = ["bez3"]
         self.scene_names = ["scene_sig.xml"]
         self.folder_name = ["sig"]
         self.scene_names = ["scene_bitbot.xml"]
@@ -187,7 +188,7 @@ class StandupEnv(gymnasium.Env):
 
         self.accel_history = []
         self.accel_history_size = max(1, round(self.options["tilt_delay"] / self.sim.dt))
-
+        # self.options["dt"] = 0.01
 
     def get_indexes(self):
         self.ranges = [self.sim.model.actuator(f"left_{dof}").ctrlrange for dof in self.dofs]
@@ -457,6 +458,8 @@ class StandupEnv(gymnasium.Env):
         reward += np.exp(-self.sim.self_collisions()) * 1e-1
 
         # Terminating the episode after the trucate_duration
+        # print(self.options["truncate_duration"])
+        # terminated = self.sim.t > 10
         terminated = self.sim.t > self.options["truncate_duration"]
         # print(self.get_tilt())
         return obs, reward, done, terminated, {}

@@ -1,3 +1,4 @@
+
 import gymnasium as gym
 import numpy as np
 import rl_zoo3
@@ -13,7 +14,6 @@ import numpy as np
 import torch as th
 import yaml
 from huggingface_sb3 import EnvironmentName
-from stable_baselines3.common.callbacks import tqdm
 from stable_baselines3.common.utils import set_random_seed
 
 import rl_zoo3.import_envs  # noqa: F401 pylint: disable=unused-import
@@ -23,6 +23,8 @@ from rl_zoo3.load_from_hub import download_from_hub
 from rl_zoo3.utils import StoreDict, get_model_path
 
 import frasa_env
+
+import os, yaml, importlib
 
 gym.register_envs(frasa_env)
 
@@ -38,11 +40,12 @@ rl_zoo3.ALGOS["crossq"] = CrossQ
 rl_zoo3.enjoy.ALGOS = rl_zoo3.ALGOS
 rl_zoo3.exp_manager.ALGOS = rl_zoo3.ALGOS
 
-def enjoy2() -> None:  # noqa: C901
+def enjoy3() -> None:  # noqa: C901
+    # 2. Create or load your CrossQ model
     parser = argparse.ArgumentParser()
-    parser.add_argument("--env", help="environment ID", type=EnvironmentName, default="CartPole-v1")
-    parser.add_argument("-f", "--folder", help="Log folder", type=str, default="rl-trained-agents")
-    parser.add_argument("--algo", help="RL Algorithm", default="ppo", type=str, required=False, choices=list(ALGOS.keys()))
+    parser.add_argument("--env", help="environment ID", type=EnvironmentName, default="frasa-standup-v0")
+    parser.add_argument("-f", "--folder", help="Log folder", type=str, default="logs/")
+    parser.add_argument("--algo", help="RL Algorithm", default="crossq", type=str, required=False, choices=list(ALGOS.keys()))
     parser.add_argument("-n", "--n-timesteps", help="number of timesteps", default=1000, type=int)
     parser.add_argument("--num-threads", help="Number of threads for PyTorch (-1 to use default)", default=-1, type=int)
     parser.add_argument("--n-envs", help="number of environments", default=1, type=int)
@@ -54,7 +57,7 @@ def enjoy2() -> None:  # noqa: C901
     parser.add_argument("--deterministic", action="store_true", default=False, help="Use deterministic actions")
     parser.add_argument("--device", help="PyTorch device to be use (ex: cpu, cuda...)", default="auto", type=str)
     parser.add_argument(
-        "--load-best", action="store_true", default=False, help="Load best model instead of last model if available"
+        "--load-best", action="store_true", default=True, help="Load best model instead of last model if available"
     )
     parser.add_argument(
         "--load-checkpoint",
@@ -78,7 +81,7 @@ def enjoy2() -> None:  # noqa: C901
         "--gym-packages",
         type=str,
         nargs="+",
-        default=[],
+        default=["frasa_env"],
         help="Additional external Gym environment package modules to import",
     )
     parser.add_argument(
@@ -183,8 +186,8 @@ def enjoy2() -> None:  # noqa: C901
         should_render= not args.no_render,
         hyperparams=hyperparams,
         env_kwargs=env_kwargs,
-    )
-
+    ) # use your real env ID from unified-humanoid-getup
+    # model = CrossQ("MlpPolicy", env)     # or load a pretrained one:
     kwargs = dict(seed=args.seed)
     if algo in off_policy_algos:
         # Dummy buffer size as we don't need memory to enjoy the trained agent
@@ -214,98 +217,81 @@ def enjoy2() -> None:  # noqa: C901
         kwargs["env"] = env
 
     model = ALGOS[algo].load(model_path, custom_objects=custom_objects, device=args.device, **kwargs)
-    # Uncomment to save patched file (for instance gym -> gymnasium)
-    # model.save(model_path)
-    # Patch VecNormalize (gym -> gymnasium)
-    # from pathlib import Path
-    # env.observation_space = model.observation_space
-    # env.action_space = model.action_space
-    # env.save(Path(model_path).parent / env_name / "vecnormalize.pkl")
+    obs_shape = env.observation_space.shape  # ← define this before using obs_shape
+    actor_state = model.policy.actor_state
+    obs_dim = actor_state.params["Dense_0"]["kernel"].shape[0]
 
-    obs = env.reset()
 
-    # Deterministic by default except for atari games
-    stochastic = args.stochastic or (is_atari or is_minigrid) and not args.deterministic
-    deterministic = not stochastic
+    import jax
+    import jax.numpy as jnp
+    from jax.experimental import jax2tf
 
-    episode_reward = 0.0
-    episode_rewards, episode_lengths = [], []
-    ep_len = 0
-    # For HER, monitor success rate
-    successes = []
-    lstm_states = None
-    episode_start = np.ones((env.num_envs,), dtype=bool)
+    import tensorflow as tf
+    import tf2onnx
 
-    generator = range(args.n_timesteps)
-    if args.progress:
-        if tqdm is None:
-            raise ImportError("Please install tqdm and rich to use the progress bar")
-        generator = tqdm(generator)
-    n_ep = 100
-    ep = 0
-    try:
-        while ep < n_ep:
-            action, lstm_states = model.predict(
-                obs,  # type: ignore[arg-type]
-                state=lstm_states,
-                episode_start=episode_start,
-                deterministic=deterministic,
-            )
-            obs, reward, done, infos = env.step(action)
+    from sbx import  CrossQ  # assume you trained with sbx.CrossQ
+    from sbx.crossq.policies import CrossQPolicy
 
-            episode_start = done
-            # env.render("none")
-            if not args.no_render:
-                env.render("human")
+    def inference_fn(observations: jnp.ndarray) -> jnp.ndarray:
+        """
+        observations: [batch, obs_dim]
+        returns:      [batch, act_dim] (greedy CrossQ action)
+        """
+        return CrossQPolicy.select_action(actor_state, observations)
 
-            episode_reward += reward[0]
-            ep_len += 1
+    # 1a. Create a random batch of observations
+    rng = jax.random.PRNGKey(0)
+    batch_size = 1
+    obs_batch = np.random.randn(batch_size, obs_dim).astype(np.float32)  # batch size 4
 
-            if args.n_envs == 1:
-                # For atari the return reward is not the atari score
-                # so we have to get it from the infos dict
-                if is_atari and infos is not None and args.verbose >= 1:
-                    episode_infos = infos[0].get("episode")
-                    if episode_infos is not None:
-                        print(f"Atari Episode Score: {episode_infos['r']:.2f}")
-                        print("Atari Episode Length", episode_infos["l"])
+    # 1b. Run through your JAX inference_fn
+    jax_out = inference_fn(jnp.array(obs_batch))
+    jax_out = np.array(jax_out)  # convert back to NumPy for easy comparison
 
-                if done and not is_atari and args.verbose > 0:
-                    # NOTE: for env using VecNormalize, the mean reward
-                    # is a normalized reward when `--norm_reward` flag is passed
-                    print(f"Episode Reward: {episode_reward:.2f}")
-                    print("Episode Length", ep_len)
-                    episode_rewards.append(episode_reward)
-                    episode_lengths.append(ep_len)
-                    episode_reward = 0.0
-                    ep_len = 0
-                    ep+=1
-                    # print(env.stand, )
+    print("JAX output:\n", jax_out)
 
-                # Reset also when the goal is achieved when using HER
-                if done and infos[0].get("is_success") is not None:
-                    if args.verbose > 1:
-                        print("Success?", infos[0].get("is_success", False))
+    inference_tf = jax2tf.convert(inference_fn, enable_xla=False)
+    inference_tf = tf.function(inference_tf, autograph=False)
+    tf_out = inference_tf(obs_batch)  # TF will accept a NumPy array
+    tf_out = tf_out.numpy()  # convert to NumPy
 
-                    if infos[0].get("is_success") is not None:
-                        successes.append(infos[0].get("is_success", False))
-                        episode_reward, ep_len = 0.0, 0
-                        ep += 1
+    print("TF output:\n", tf_out)
 
-    except KeyboardInterrupt:
-        pass
+    # 2b. Quick numeric check
+    diff = np.max(np.abs(jax_out - tf_out))
+    print(f"Max abs difference JAX vs TF: {diff:.3e}")
+    # assert diff < 1e-5, "JAX→TF conversion drift is too large!"
 
-    if args.verbose > 0 and len(successes) > 0:
-        print(f"Success rate: {100 * np.mean(successes):.2f}%")
+    #
+    import tf2onnx
 
-    if args.verbose > 0 and len(episode_rewards) > 0:
-        print(f"{len(episode_rewards)} Episodes")
-        print(f"{np.mean(episode_rewards):.2f},{np.std(episode_rewards):.2f}")
 
-    if args.verbose > 0 and len(episode_lengths) > 0:
-        print(f"Mean episode length: {np.mean(episode_lengths):.2f} +/- {np.std(episode_lengths):.2f}")
+    # inference_onnx = tf2onnx.convert.from_function(inference_tf, input_signature=[tf.TensorSpec([1, 1])])
+    input_spec = tf.TensorSpec([batch_size, obs_dim], tf.float32, name="observations")
 
-    env.close()
+    model_proto, external_tensor_storage = tf2onnx.convert.from_function(
+        inference_tf,
+        input_signature=[input_spec],
+        opset=17,  # adjust if needed
+        output_path="crossq_live.onnx"  # writes the file for you
+    )
+    import onnxruntime as rt
+
+    # 3a. Load the exported ONNX file
+    sess = rt.InferenceSession("crossq_live.onnx", providers=["CPUExecutionProvider"])
+
+    # 3b. Run inference
+    inputs = {"observations": obs_batch}
+    onnx_out = sess.run(None, inputs)[0]  # grab first (and only) output
+
+    print("ONNX output:\n", onnx_out)
+
+    # 3c. Compare to the JAX baseline
+    diff2 = np.max(np.abs(jax_out - onnx_out))
+    print(f"Max abs difference JAX vs ONNX: {diff2:.3e}")
+    # assert diff2 < 1e-4, "JAX→ONNX drift is too large!"
+
+
 
 if __name__ == "__main__":
-    enjoy2()
+    enjoy3()

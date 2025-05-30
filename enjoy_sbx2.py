@@ -23,7 +23,7 @@ from rl_zoo3.load_from_hub import download_from_hub
 from rl_zoo3.utils import StoreDict, get_model_path
 
 import frasa_env
-
+import onnxruntime as ort
 gym.register_envs(frasa_env)
 
 rl_zoo3.ALGOS["ddpg"] = DDPG
@@ -38,11 +38,12 @@ rl_zoo3.ALGOS["crossq"] = CrossQ
 rl_zoo3.enjoy.ALGOS = rl_zoo3.ALGOS
 rl_zoo3.exp_manager.ALGOS = rl_zoo3.ALGOS
 
-def enjoy2() -> None:  # noqa: C901
+def enjoy3() -> None:  # noqa: C901
+    # 2. Create or load your CrossQ model
     parser = argparse.ArgumentParser()
-    parser.add_argument("--env", help="environment ID", type=EnvironmentName, default="CartPole-v1")
-    parser.add_argument("-f", "--folder", help="Log folder", type=str, default="rl-trained-agents")
-    parser.add_argument("--algo", help="RL Algorithm", default="ppo", type=str, required=False, choices=list(ALGOS.keys()))
+    parser.add_argument("--env", help="environment ID", type=EnvironmentName, default="frasa-standup-v0")
+    parser.add_argument("-f", "--folder", help="Log folder", type=str, default="logs/")
+    parser.add_argument("--algo", help="RL Algorithm", default="crossq", type=str, required=False, choices=list(ALGOS.keys()))
     parser.add_argument("-n", "--n-timesteps", help="number of timesteps", default=1000, type=int)
     parser.add_argument("--num-threads", help="Number of threads for PyTorch (-1 to use default)", default=-1, type=int)
     parser.add_argument("--n-envs", help="number of environments", default=1, type=int)
@@ -54,7 +55,7 @@ def enjoy2() -> None:  # noqa: C901
     parser.add_argument("--deterministic", action="store_true", default=False, help="Use deterministic actions")
     parser.add_argument("--device", help="PyTorch device to be use (ex: cpu, cuda...)", default="auto", type=str)
     parser.add_argument(
-        "--load-best", action="store_true", default=False, help="Load best model instead of last model if available"
+        "--load-best", action="store_true", default=True, help="Load best model instead of last model if available"
     )
     parser.add_argument(
         "--load-checkpoint",
@@ -78,7 +79,7 @@ def enjoy2() -> None:  # noqa: C901
         "--gym-packages",
         type=str,
         nargs="+",
-        default=[],
+        default=["frasa_env"],
         help="Additional external Gym environment package modules to import",
     )
     parser.add_argument(
@@ -183,8 +184,8 @@ def enjoy2() -> None:  # noqa: C901
         should_render= not args.no_render,
         hyperparams=hyperparams,
         env_kwargs=env_kwargs,
-    )
-
+    ) # use your real env ID from unified-humanoid-getup
+    # model = CrossQ("MlpPolicy", env)     # or load a pretrained one:
     kwargs = dict(seed=args.seed)
     if algo in off_policy_algos:
         # Dummy buffer size as we don't need memory to enjoy the trained agent
@@ -213,10 +214,32 @@ def enjoy2() -> None:  # noqa: C901
     if "HerReplayBuffer" in hyperparams.get("replay_buffer_class", ""):
         kwargs["env"] = env
 
-    model = ALGOS[algo].load(model_path, custom_objects=custom_objects, device=args.device, **kwargs)
+      # ── If you want to use ONNX instead of the SB3 model, comment out the SB3 load
+      # and point this path at your exported ONNX file:
+    onnx_path = "crossq_live.onnx"
+    use_onnx = os.path.isfile(onnx_path) and algo == "crossq"
+    # use_onnx = False
+    if use_onnx:
+            print(f"▶ Using ONNX policy from {onnx_path}")
+            sess_opts = ort.SessionOptions()
+            sess_opts.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+            sess_opts.intra_op_num_threads = 4  # how many threads per node
+            sess_opts.inter_op_num_threads = 1  # how many nodes run in parallel
+            sess_opts.enable_mem_pattern = True
+            sess_opts.enable_cpu_mem_arena = True
+            # On a desktop/server with an NVIDIA GPU:
+            # providers = ["CUDAExecutionProvider", "CPUExecutionProvider"]
+            # On Jetson Orin, try TensorRT first:
+            providers = ["TensorrtExecutionProvider", "CUDAExecutionProvider", "CPUExecutionProvider"]
+
+            ort_session = ort.InferenceSession(onnx_path, sess_options=sess_opts, providers=providers)
+    else:
+            model = ALGOS[algo].load(model_path, custom_objects=custom_objects, device=args.device, **kwargs)
+
+    # model = ALGOS[algo].load(model_path, custom_objects=custom_objects, device=args.device, **kwargs)
     # Uncomment to save patched file (for instance gym -> gymnasium)
     # model.save(model_path)
-    # Patch VecNormalize (gym -> gymnasium)
+    # # Patch VecNormalize (gym -> gymnasium)
     # from pathlib import Path
     # env.observation_space = model.observation_space
     # env.action_space = model.action_space
@@ -245,12 +268,27 @@ def enjoy2() -> None:  # noqa: C901
     ep = 0
     try:
         while ep < n_ep:
-            action, lstm_states = model.predict(
-                obs,  # type: ignore[arg-type]
-                state=lstm_states,
-                episode_start=episode_start,
-                deterministic=deterministic,
-            )
+            # action, lstm_states = model.predict(
+            #     obs,  # type: ignore[arg-type]
+            #     state=lstm_states,
+            #     episode_start=episode_start,
+            #     deterministic=deterministic,
+            # )
+            if use_onnx:
+                # ONNXRuntime expects a numpy float32 array of shape [batch, obs_dim]
+                # print(obs)
+                # obs[0][-6] = 0
+                # print(obs)
+                obs_np = np.array(obs, dtype=np.float32)
+                # name "observations" must match the tf2onnx input tensor name
+                action = ort_session.run(None, {"observations": obs_np})[0]
+            else:
+                action, lstm_states = model.predict(
+                    obs,  # type: ignore[arg-type]
+                    state=lstm_states,
+                    episode_start=episode_start,
+                    deterministic=deterministic,
+                )
             obs, reward, done, infos = env.step(action)
 
             episode_start = done
@@ -308,4 +346,4 @@ def enjoy2() -> None:  # noqa: C901
     env.close()
 
 if __name__ == "__main__":
-    enjoy2()
+    enjoy3()
