@@ -40,7 +40,7 @@ frasa-standup-v0-25ms:
 
 # CrossQ Paper hyperparameters net_arch=[512, 512, 256]
 frasa-standup-v0: &frasa-standup
-  n_timesteps: !!float 15e6
+  n_timesteps: !!float 6e5
   policy: 'MlpPolicy'
   learning_rate: !!float 0.001
   buffer_size: 1000000

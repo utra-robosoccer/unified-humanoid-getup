@@ -124,17 +124,17 @@ class StandupEnv(gymnasium.Env):
         # self.folder_name = ["op3"]
         # self.scene_names = ["scene_bez.xml"]
         # self.folder_name = ["bez"]
-        self.scene_names = ["scene_bez3.xml"]
-        self.folder_name = ["bez3"]
-        self.scene_names = ["scene_sig.xml"]
-        self.folder_name = ["sig"]
-        self.scene_names = ["scene_bitbot.xml"]
-        self.folder_name = ["bitbot"]
+        # self.scene_names = ["scene_bez3.xml"]
+        # self.folder_name = ["bez3"]
+        # self.scene_names = ["scene_sig.xml"]
+        # self.folder_name = ["sig"]
+        # self.scene_names = ["scene_bitbot.xml"]
+        # self.folder_name = ["bitbot"]
         # self.scene_names = ["scene_nugus.xml"]
         # self.folder_name = ["nugus"]
 
         self.multi = True
-        self.record = True
+        self.record = False
         self.stand = False
         self.stand_time = float("inf")
 
