@@ -4,7 +4,7 @@ from .standup_env import StandupEnv
 
 
 class FRASAEnv(StandupEnv):
-    def __init__(self, evaluation=False, render_mode="none", options=None):
+    def __init__(self, robot_name:list = ["bez1"], evaluation=False, render_mode="none", options=None):
         options = options or {}
         options["stabilization_time"] = 2.0
         options["truncate_duration"] = 5.0
@@ -12,4 +12,4 @@ class FRASAEnv(StandupEnv):
         options["vmax"] = 2 * np.pi
         options["reset_final_p"] = 0.1
 
-        super().__init__(evaluation=evaluation, render_mode=render_mode, options=options)
+        super().__init__(robot_name=robot_name, evaluation=evaluation, render_mode=render_mode, options=options)

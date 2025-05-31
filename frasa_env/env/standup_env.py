@@ -15,8 +15,7 @@ from frasa_env.mujoco_simulator.simulator import Simulator, tf
 class StandupEnv(gymnasium.Env):
     metadata = {"render_modes": ["human", "none"], "render_fps": 30}
 
-    def __init__(self, render_mode="none", options: Optional[dict] = None, evaluation: bool = False):
-
+    def __init__(self,robot_name:list = ["bez1"],  render_mode="none", options: Optional[dict] = None, evaluation: bool = False, **kwargs):
         self.options = {
             # Duration of the stabilization pre-simulation (waiting for the gravity to stabilize the robot) [s]
             "stabilization_time": 2.0,
@@ -118,8 +117,8 @@ class StandupEnv(gymnasium.Env):
         #                     "scene_bitbot.xml", "scene_nugus.xml"]
         # self.folder_name = ["sig", "bez", "op3", "bez1", "bitbot", "nugus"]
 
-        self.scene_names = ["scene_bez1.xml"]
-        self.folder_name = ["bez1"]
+        # self.scene_names = ["scene_bez1.xml"]
+        self.folder_name = robot_name
         # self.scene_names = ["scene_op3.xml"]
         # self.folder_name = ["op3"]
         # self.scene_names = ["scene_bez.xml"]
@@ -147,9 +146,9 @@ class StandupEnv(gymnasium.Env):
         self.hei = {"sig":0.67, "bez":0.54, "bez3":0.62, "op3":0.49199, "bez1":0.48083660868911876, "bitbot":0.7673033792122936, "nugus":0.8086855785416924}
         self.desired_height = self.hei[self.folder_name[0]]
 
-        self.count = [0] * len(self.scene_names)
+        self.count = [0] * len(self.folder_name)
         self.current_index = 0
-        self.sim = Simulator(scene_name=self.scene_names[self.current_index])
+        self.sim = Simulator(scene_name=f"scene_{self.folder_name[self.current_index]}.xml")
 
         # Loading initial configuration cache
         self.initial_config = None
@@ -162,7 +161,7 @@ class StandupEnv(gymnasium.Env):
                 with open(initial_config_path, "rb") as f:
                     self.initial_config.append(pickle.load(f))
 
-        assert(len(self.initial_config) == len(self.scene_names))
+        assert(len(self.initial_config) == len(self.folder_name))
 
         # Degrees of freedom involved
         self.dofs = ["elbow", "shoulder_pitch", "hip_pitch", "knee", "ankle_pitch"]
@@ -595,12 +594,12 @@ class StandupEnv(gymnasium.Env):
 
             self.n_ep += 1
         if self.multi:
-            self.current_index= random.choice(range(len(self.scene_names)))
+            self.current_index= random.choice(range(len(self.folder_name)))
             self.count[self.current_index] +=1
             # print(self.count)
             # self.current_index = 6
             # self.current_index = (self.current_index + 1) % len(self.scene_names)
-            new_scene = self.scene_names[self.current_index]
+            new_scene = f"scene_{self.folder_name[self.current_index]}.xml"
 
             self.sim.close_viewer()
             self.sim = Simulator( scene_name=new_scene)
