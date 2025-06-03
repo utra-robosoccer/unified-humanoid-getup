@@ -118,18 +118,14 @@ class StandupEnv(gymnasium.Env):
         # self.folder_name = ["sig", "bez", "op3", "bez1", "bitbot", "nugus"]
 
         # self.scene_names = ["scene_bez1.xml"]
+        print(robot_name)
         self.folder_name = robot_name
-        # self.scene_names = ["scene_op3.xml"]
+        # self.folder_name = ["bez1"]  # robot_name
         # self.folder_name = ["op3"]
-        # self.scene_names = ["scene_bez.xml"]
         # self.folder_name = ["bez"]
-        # self.scene_names = ["scene_bez3.xml"]
         # self.folder_name = ["bez3"]
-        # self.scene_names = ["scene_sig.xml"]
         # self.folder_name = ["sig"]
-        # self.scene_names = ["scene_bitbot.xml"]
         # self.folder_name = ["bitbot"]
-        # self.scene_names = ["scene_nugus.xml"]
         # self.folder_name = ["nugus"]
 
         self.multi = True
@@ -549,7 +545,7 @@ class StandupEnv(gymnasium.Env):
     ):
         super().reset(seed=seed)
         if self.record:
-            print(f"Ep: {self.n_ep}")
+
             if self.stand:
                 if self.pose_init == "front":
                     self.tot_time_to_stand[0].append(self.stand_time)
@@ -565,7 +561,8 @@ class StandupEnv(gymnasium.Env):
             elif self.pose_init == "up":
                 self.stand_success_count[2].append(int(self.stand))
             # print(self.init_pose)
-            if self.n_ep >= 0:
+            if self.n_ep ==99:
+                print(f"Ep: {self.n_ep}")
                 print(self.folder_name[0])
                 tot = []
                 for i in self.stand_success_count:
@@ -578,18 +575,20 @@ class StandupEnv(gymnasium.Env):
                 print(f"Stand: {self.stand}, Stand time: {self.stand_time}")
                 print(f"{np.mean(tot)},{np.std(tot)},{sum(tot)},{sum(self.init_pose)},{np.mean(tot2)},{np.std(tot2)}"
                       )
-                if self.init_pose[0] > 0:
-                    print(f"{np.mean(self.stand_success_count[0])},"
-                          f"{np.std(self.stand_success_count[0])},{sum(self.stand_success_count[0])},{self.init_pose[0]},"
-                          f"{np.mean(self.tot_time_to_stand[0])},{np.std(self.tot_time_to_stand[0])}")
-                if self.init_pose[1] > 0:
-                    print(f"{np.mean(self.stand_success_count[1])},"
-                          f"{np.std(self.stand_success_count[1])},{sum(self.stand_success_count[1])},{self.init_pose[1]},"
-                          f"{np.mean(self.tot_time_to_stand[1])},{np.std(self.tot_time_to_stand[1])}")
-                if self.init_pose[2] > 0:
-                    print(f"{np.mean(self.stand_success_count[2])},"
-                          f"{np.std(self.stand_success_count[2])},{sum(self.stand_success_count[2])},{self.init_pose[2]},"
-                          f"{np.mean(self.tot_time_to_stand[2])},{np.std(self.tot_time_to_stand[2])}")
+                with open(f'{self.folder_name[0]}_tmp.txt', 'a') as file:
+                    file.write(f"{np.mean(tot)},{np.std(tot)},{sum(tot)},{sum(self.init_pose)},{np.mean(tot2)},{np.std(tot2)}\n")
+                # if self.init_pose[0] > 0:
+                #     print(f"{np.mean(self.stand_success_count[0])},"
+                #           f"{np.std(self.stand_success_count[0])},{sum(self.stand_success_count[0])},{self.init_pose[0]},"
+                #           f"{np.mean(self.tot_time_to_stand[0])},{np.std(self.tot_time_to_stand[0])}")
+                # if self.init_pose[1] > 0:
+                #     print(f"{np.mean(self.stand_success_count[1])},"
+                #           f"{np.std(self.stand_success_count[1])},{sum(self.stand_success_count[1])},{self.init_pose[1]},"
+                #           f"{np.mean(self.tot_time_to_stand[1])},{np.std(self.tot_time_to_stand[1])}")
+                # if self.init_pose[2] > 0:
+                #     print(f"{np.mean(self.stand_success_count[2])},"
+                #           f"{np.std(self.stand_success_count[2])},{sum(self.stand_success_count[2])},{self.init_pose[2]},"
+                #           f"{np.mean(self.tot_time_to_stand[2])},{np.std(self.tot_time_to_stand[2])}")
 
 
             self.n_ep += 1

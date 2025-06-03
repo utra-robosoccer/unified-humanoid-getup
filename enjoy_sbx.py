@@ -49,8 +49,11 @@ def enjoy2() -> None:  # noqa: C901
     parser.add_argument("--exp-id", help="Experiment ID (default: 0: latest, -1: no exp folder)", default=0, type=int)
     parser.add_argument("--verbose", help="Verbose mode (0: no output, 1: INFO)", default=1, type=int)
     parser.add_argument(
-        "--no-render", action="store_true", default=False, help="Do not render the environment (useful for tests)"
+        "--no-render", action="store_true", default=True, help="Do not render the environment (useful for tests)"
     )
+    # parser.add_argument(
+    #     "--no-render", action="store_true", default=False, help="Do not render the environment (useful for tests)"
+    # )
     parser.add_argument("--deterministic", action="store_true", default=False, help="Use deterministic actions")
     parser.add_argument("--device", help="PyTorch device to be use (ex: cpu, cuda...)", default="auto", type=str)
     parser.add_argument(
@@ -273,8 +276,8 @@ def enjoy2() -> None:  # noqa: C901
                 if done and not is_atari and args.verbose > 0:
                     # NOTE: for env using VecNormalize, the mean reward
                     # is a normalized reward when `--norm_reward` flag is passed
-                    print(f"Episode Reward: {episode_reward:.2f}")
-                    print("Episode Length", ep_len)
+                    # print(f"Episode Reward: {episode_reward:.2f}")
+                    # print("Episode Length", ep_len)
                     episode_rewards.append(episode_reward)
                     episode_lengths.append(ep_len)
                     episode_reward = 0.0
@@ -295,15 +298,15 @@ def enjoy2() -> None:  # noqa: C901
     except KeyboardInterrupt:
         pass
 
-    if args.verbose > 0 and len(successes) > 0:
-        print(f"Success rate: {100 * np.mean(successes):.2f}%")
-
-    if args.verbose > 0 and len(episode_rewards) > 0:
-        print(f"{len(episode_rewards)} Episodes")
-        print(f"{np.mean(episode_rewards):.2f},{np.std(episode_rewards):.2f}")
-
-    if args.verbose > 0 and len(episode_lengths) > 0:
-        print(f"Mean episode length: {np.mean(episode_lengths):.2f} +/- {np.std(episode_lengths):.2f}")
+    # if args.verbose > 0 and len(successes) > 0:
+    #     print(f"Success rate: {100 * np.mean(successes):.2f}%")
+    #
+    # if args.verbose > 0 and len(episode_rewards) > 0:
+    #     print(f"{len(episode_rewards)} Episodes")
+    #     print(f"{np.mean(episode_rewards):.2f},{np.std(episode_rewards):.2f}")
+    #
+    # if args.verbose > 0 and len(episode_lengths) > 0:
+    #     print(f"Mean episode length: {np.mean(episode_lengths):.2f} +/- {np.std(episode_lengths):.2f}")
 
     env.close()
 
