@@ -1,22 +1,36 @@
 #!/usr/bin/env python3
 import subprocess
 from functools import reduce
+
+import numpy as np
+
+
 def main():
     # List all the robot names you want to sweep over:
-    multiplier = 7
+    multiplier1 = 7  # number of robots
+    multiplier2 = 10  # number of seeds per row
+    multiplier3 = 1  # number of rows
+    multiplier = multiplier2 * multiplier3
     robot_names = [
         # s2
-        [['bez1']]*multiplier,
-        [['op3']]*multiplier,
-        [['bez']]*multiplier,
-        [['bez3']]*multiplier,
-        [['sig']]*multiplier,
-        [['bitbot']]*multiplier,
-        [['nugus']]*multiplier,
+        [['bez1']] * multiplier,
+        [['op3']] * multiplier,
+        [['bez']] * multiplier,
+        [['bez3']] * multiplier,
+        [['sig']] * multiplier,
+        [['bitbot']] * multiplier,
+        [['nugus']] * multiplier,
     ]
-    robot_names = reduce(lambda x,y :x+y ,robot_names)
-    # ids = [13,20,27,34]*7
-    ids = [35,36,37,38,39,40,41] * 7
+    robot_names = reduce(lambda x, y: x + y, robot_names)
+    ids = [9, 16, 23, 30] * 7
+    ids = []
+    for i in range(multiplier3):
+        ids.append(np.linspace(56 + i, 65 + i, multiplier2, dtype=int))
+    ids = np.array(ids * multiplier1).flatten()
+    print(ids)
+    print(robot_names)
+    print(len(ids))
+    print(len(robot_names))
 
     for idx, name in enumerate(robot_names):
         cmd = [

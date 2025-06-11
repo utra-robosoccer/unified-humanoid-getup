@@ -5,13 +5,19 @@ def main():
     # List all the robot names you want to sweep over:
     robot_names = [
         # s2
-        ['bez1'],
-        ['op3'],
-        ['bez'],
-        ['bez3'],
-        ['sig'],
-        ['bitbot'],
-        ['nugus'],
+
+        # ['sig'],
+        # ['bitbot'],
+        # ['nugus'],
+        #
+        # ['bez1'],
+        # ['op3'],
+        # ['bez'],
+        # ['bez3'],
+        #
+        # ['sig'],
+        # ['bitbot'],
+        # ['nugus'],
         # all 7
         # [ 'bez1','op3','bez','bez3', 'sig', 'bitbot', 'nugus'],
         # s1
@@ -27,11 +33,14 @@ def main():
         # ['bez3', 'op3',  'bitbot',],
         # [ 'bez', 'bez3','op3', 'bitbot', 'nugus'],
         # ['bez1',  'bez3', 'nugus'],
-
-
+        # s4
+        # ['bez', 'sig'],
+        # ['op3', 'bez', 'sig'],
+        ['bez1', 'op3', 'bez', 'sig'],
+        # ['bez1', 'op3', 'bez', 'sig', 'nugus'],
     ]
 
-    for i in range(2):
+    for i in range(7):
         for name in robot_names:
             cmd = [
                 "python", "train_sbx.py",

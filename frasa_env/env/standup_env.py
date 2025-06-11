@@ -129,7 +129,7 @@ class StandupEnv(gymnasium.Env):
         # self.folder_name = ["nugus"]
 
         self.multi = True
-        self.record = False
+        self.record = True
         self.stand = False
         self.stand_time = float("inf")
 
