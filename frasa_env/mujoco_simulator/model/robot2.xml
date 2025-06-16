@@ -53,7 +53,7 @@
         <joint class="xm430" name="head_yaw" pos="0 0 0" axis="0 0 1"  />
         <geom pos="0 -0.00025 -0.0725" quat="1 0 0 0" type="mesh" rgba="0.364706 0.439216 0.509804 1" mesh="neck_v6_1"/>
         <body name="head" pos="0 -0.0185 0.025">
-          <inertial pos="-0.0025762 0.0189918 0.0330059" quat="0.968363 -0.00401205 0.248843 0.0182951" mass="0.264339" 
+          <inertial pos="-0.0025762 0.0189918 0.0330059" quat="0.968363 -0.00401205 0.248843 0.0182951" mass="0.264339"
                     diaginertia="0.000267836 0.000238997 0.000135166"/>
           <joint class="xm430" name="head_pitch" pos="0 0 0" axis="0 1 0"  />
           <geom pos="0 0.01825 -0.0975" quat="1 0 0 0" type="mesh" rgba="0.627451 0.627451 0.627451 1" mesh="head_v4_1"/>

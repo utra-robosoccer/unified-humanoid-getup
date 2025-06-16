@@ -1,5 +1,5 @@
 
-# Unified Humanoid Get-Up (fork of FRASA)
+# Unified Humanoid Get-Up
 
 This repo contains the code for the RoboCup 2025 paper
 **Learning to Get Up Across Morphologies: Zero-Shot Recovery with a Unified Humanoid Policy**.
@@ -12,8 +12,8 @@ The methodology and results of this work are detailed in [this paper](https://ar
 The platform used for this project is the *Sigmaban humanoid robot*, developed by the *Rhoban Team*. The performance of the trained agent has been validated on the physical robot, as demonstrated in the examples below:
 
 <div align=center />
-   <img src="https://github.com/user-attachments/assets/52333ee2-8c39-40f3-acb4-0d816a807dfa" alt="Pull_back" width="47%" maxwidth="500px">
-   <img src="https://github.com/user-attachments/assets/6e015b8b-a0ed-45c1-be39-5183c4b9a0f5" alt="Pull_front" width="47%" maxwidth="500px">
+   <img src="assets/b2_getupback.gif" alt="Pull_back" width="47%" maxwidth="500px">
+   <img src="assets/b2_getupfront.gif" alt="Pull_front" width="47%" maxwidth="500px">
 </div>
 
 ## Installation

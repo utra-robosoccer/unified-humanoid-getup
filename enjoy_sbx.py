@@ -49,7 +49,7 @@ def enjoy2() -> None:  # noqa: C901
     parser.add_argument("--exp-id", help="Experiment ID (default: 0: latest, -1: no exp folder)", default=0, type=int)
     parser.add_argument("--verbose", help="Verbose mode (0: no output, 1: INFO)", default=1, type=int)
     parser.add_argument(
-        "--no-render", action="store_true", default=True, help="Do not render the environment (useful for tests)"
+        "--no-render", action="store_true", default=False, help="Do not render the environment (useful for tests)"
     )
     # parser.add_argument(
     #     "--no-render", action="store_true", default=False, help="Do not render the environment (useful for tests)"

@@ -1,6 +1,12 @@
 <mujoco model="rhoban">
+	    <size memory="1500M"/>
 	<include file="robot.xml"/>
-
+	<include file="b2_prefixed.xml"/>
+	<include file="b1_prefixed.xml"/>
+	<include file="b3_prefixed.xml"/>
+	<include file="op3_prefixed.xml"/>
+	<include file="bb_prefixed.xml"/>
+	<include file="nug_prefixed.xml"/>
 	<visual>
 		<headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
 		<rgba haze="0.15 0.25 0.35 1"/>

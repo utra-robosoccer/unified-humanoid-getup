@@ -15,7 +15,7 @@ from frasa_env.mujoco_simulator.simulator import Simulator, tf
 class StandupEnv(gymnasium.Env):
     metadata = {"render_modes": ["human", "none"], "render_fps": 30}
 
-    def __init__(self,robot_name:list = ["bez1"],  render_mode="none", options: Optional[dict] = None, evaluation: bool = False, **kwargs):
+    def __init__(self,robot_name:list = ["bez2"],  render_mode="none", options: Optional[dict] = None, evaluation: bool = False, **kwargs):
         self.options = {
             # Duration of the stabilization pre-simulation (waiting for the gravity to stabilize the robot) [s]
             "stabilization_time": 2.0,
@@ -128,8 +128,8 @@ class StandupEnv(gymnasium.Env):
         # self.folder_name = ["bitbot"]
         # self.folder_name = ["nugus"]
 
-        self.multi = True
-        self.record = True
+        self.multi = False
+        self.record = False
         self.stand = False
         self.stand_time = float("inf")
 

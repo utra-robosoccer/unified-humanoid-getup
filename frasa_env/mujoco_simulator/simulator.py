@@ -171,11 +171,11 @@ class Simulator:
         T[:3, 3] = site.xpos
         return T
 
-    def get_T_world_fbase(self) -> np.ndarray:
+    def get_T_world_fbase(self, root_name:str = "root") -> np.ndarray:
         """
         Gets the transformation from world to floating base frame.
         """
-        data = self.data.joint("root").qpos
+        data = self.data.joint(root_name).qpos
         quat = data[3:]
         pos = data[:3]
 
@@ -183,14 +183,14 @@ class Simulator:
         T[:3, 3] = pos
         return T
 
-    def set_T_world_fbase(self, T: np.ndarray) -> None:
+    def set_T_world_fbase(self, T: np.ndarray, root_name:str = "root") -> None:
         """
         Updates the floating base so that a body transformation match the target one
 
         Args:
             T (np.ndarray): target transformation
         """
-        joint = self.data.joint("root")
+        joint = self.data.joint(root_name)
 
         quat = tf.quaternion_from_matrix(T)
         pos = T[:3, 3]
@@ -204,31 +204,31 @@ class Simulator:
         """
         self.data.qvel[:] = 0
 
-    def set_T_world_body(self, body_name: str, T_world_bodyTarget: np.ndarray) -> None:
+    def set_T_world_body(self, body_name: str, T_world_bodyTarget: np.ndarray, root_name:str = "root") -> None:
         """
         Updates the floating base so that a body transformation match the target one
 
         Args:
             body_name (str): body name
         """
-        T_world_fbase = self.get_T_world_fbase()
+        T_world_fbase = self.get_T_world_fbase(root_name)
         T_world_body = self.get_T_world_body(body_name)
         T_body_fbase = np.linalg.inv(T_world_body) @ T_world_fbase
 
         self.set_T_world_fbase(T_world_bodyTarget @ T_body_fbase)
 
-    def set_T_world_site(self, site_name: str, T_world_siteTarget: np.ndarray) -> None:
+    def set_T_world_site(self, site_name: str, T_world_siteTarget: np.ndarray, root_name:str = "root") -> None:
         """
         Updates the floating base so that a site transformation match the target one
 
         Args:
             site_name (str): site name
         """
-        T_world_fbase = self.get_T_world_fbase()
+        T_world_fbase = self.get_T_world_fbase(root_name)
         T_world_site = self.get_T_world_site(site_name)
         T_site_fbase = np.linalg.inv(T_world_site) @ T_world_fbase
 
-        self.set_T_world_fbase(T_world_siteTarget @ T_site_fbase)
+        self.set_T_world_fbase(T_world_siteTarget @ T_site_fbase, root_name)
 
     def get_pressure_sensors(self) -> dict:
         left_pressures = [
@@ -332,7 +332,27 @@ if __name__ == "__main__":
     # sim = Simulator(scene_name="scene_op3.xml")
     # sim = Simulator(scene_name="scene_nugus.xml") #euler="-1.57  0 0.2 "  left_hip_pitch
     sim.step()
-    sim.set_T_world_site("left_foot", np.eye(4))
+    x = np.eye(4)
+    x[:3, 3] = [0, 0, 0]
+    sim.set_T_world_site("b1_left_foot", x, root_name="b1_root")
+    x = np.eye(4)
+    x[:3, 3] = [0, 0.275, 0]
+    sim.set_T_world_site("op3_left_foot", x, root_name="op3_root")
+    x = np.eye(4)
+    x[:3, 3] = [0, 0.575, 0]
+    sim.set_T_world_site("b2_left_foot", x, root_name="b2_root")
+    x = np.eye(4)
+    x[:3, 3] = [0, 0.9, 0]
+    sim.set_T_world_site("b3_left_foot", x, root_name="b3_root")
+    x = np.eye(4)
+    x[:3, 3] = [0, 1.275, 0]
+    sim.set_T_world_site("left_foot",x)
+    x = np.eye(4)
+    x[:3, 3] = [0, 1.7, 0]
+    sim.set_T_world_site("bb_left_foot", x, root_name="bb_root")
+    x = np.eye(4)
+    x[:3, 3] = [0, 2.05, 0]
+    sim.set_T_world_site("nug_left_foot", x, root_name="nug_root")
 
     sim.step()
     start = time.time()
@@ -391,12 +411,12 @@ if __name__ == "__main__":
         # sim.set_control("left_knee", 1.37881)
         # sim.set_control("right_ankle_pitch", -0.6370452)
         # sim.set_control("left_ankle_pitch", -0.6370452)
-        R = sim.data.site("trunk").xmat
-        pitch = np.arctan2(R[6], R[8])
-        # print(R)
-
-        x = [sim.get_actuator_index(f"left_{dof}") for dof in dofs]
-        # print(x)
+        # R = sim.data.site("trunk").xmat
+        # pitch = np.arctan2(R[6], R[8])
+        # # print(R)
+        #
+        # x = [sim.get_actuator_index(f"left_{dof}") for dof in dofs]
+        # # print(x)
         # # print(sim.get_T_world_site('camera')[0:3][:,3])
         # # print(sim.t)
         # # if sim.t > 5 and once:
@@ -410,7 +430,7 @@ if __name__ == "__main__":
         # left_foot = sim.get_T_world_site('left_foot')[2][3]
         # right_foot = sim.get_T_world_site('right_foot')[2][3]
         # foot = (left_foot+right_foot)/2
-        print(sim.get_rpy())
+        # print(sim.get_rpy())
         # print(sim.get_head_height())
         # print(foot)
         # head_height = np.linalg.norm(sim.get_T_world_site('camera')[0:3][:,3] - foot)
