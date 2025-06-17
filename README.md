@@ -20,14 +20,14 @@ Everything you need to train, evaluate, or extend a zero-shot humanoid get-up po
 The humanoid platforms used for this project are shown below.
 
 <div align=center />
-   <img src="assets/all_robot.png" >
+   <img src="https://raw.githubusercontent.com/utra-robosoccer/unified-humanoid-getup/refs/heads/main/assets/all_robot.png"  >
 </div>
 
 The performance of the trained agent has been validated in MuJoCo, as demonstrated in the examples below:
 
 <div align=center />
-   <img src="assets/b2_getupback.gif" alt="Pull_back" width="47%" maxwidth="500px">
-   <img src="assets/b2_getupfront.gif" alt="Pull_front" width="47%" maxwidth="500px">
+   <img src="https://raw.githubusercontent.com/utra-robosoccer/unified-humanoid-getup/refs/heads/main/assets/b2_getupback.gif" alt="Pull_back" width="47%" maxwidth="500px">
+   <img src="https://raw.githubusercontent.com/utra-robosoccer/unified-humanoid-getup/refs/heads/main/assets/b2_getupfront.gif" alt="Pull_front" width="47%" maxwidth="500px">
 </div>
 
 ## Installation
