@@ -6,11 +6,16 @@
 
 [//]: # "![DOI](https://img.shields.io/badge/zenodo-DOI_pending-lightgrey.svg)"
 
-This repo contains the code for the RoboCup 2025 paper
-**Learning to Get Up Across Morphologies: Zero-Shot Recovery with a Unified Humanoid Policy** [(paper)](https://www.researchgate.net/publication/392468914_Learning_to_Get_Up_Across_Morphologies_Zero-Shot_Recovery_with_a_Unified_Humanoid_Policy).
-It builds on FRASA by adding 6 new humanoid robots (Total 7) and making the reward function generalizable.
+**Unified Humanoid Get-Up (UHG)** is the open-source artifact for our RoboCup 2025 paper
+**“Learning to Get Up Across Morphologies: Zero-Shot Recovery with a Unified Humanoid Policy.”** [(paper)](https://www.researchgate.net/publication/392468914_Learning_to_Get_Up_Across_Morphologies_Zero-Shot_Recovery_with_a_Unified_Humanoid_Policy)
 
-This repository contains the code to train the agent using reinforcement learning (RL) algorithms. Training is conducted in a _MuJoCo_ environment with the _stable-baselines3_ library. The agent is designed to recover from falls and stand up from both prone and supine positions.
+Built on the original FRASA framework, UHG:
+
+- **Adds six new MJCF models**—Wolfgang, NUGUS, Bez1, Bez2, Bez3, and OP3-Rot (7 robots total).
+- **Generalises the reward function** so one policy can recover from prone or supine falls on any robot without per-model tuning.
+- **Packages a Gym/_MuJoCo_ environment and CrossQ training pipeline** (_stable-baselines3_ library).
+
+Everything you need to train, evaluate, or extend a zero-shot humanoid get-up policy lives in this repository.
 
 The humanoid platforms used for this project are shown below.
 
