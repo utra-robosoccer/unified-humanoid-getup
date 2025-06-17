@@ -325,8 +325,8 @@ class Simulator:
 if __name__ == "__main__":
 
     # sim = Simulator(scene_name="scene_bez1.xml")
-    # sim = Simulator(scene_name="scene_op3_rot.xml")
-    sim = Simulator(scene_name="scene_bez2.xml")
+    sim = Simulator(scene_name="scene_op3_rot.xml")
+    # sim = Simulator(scene_name="scene_bez2.xml")
     # sim = Simulator(scene_name="scene_bez3.xml")
     # sim = Simulator(scene_name="scene_sigmaban.xml")
     # sim = Simulator(scene_name="scene_wolfgang.xml")
