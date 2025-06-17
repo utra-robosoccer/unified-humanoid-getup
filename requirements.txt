@@ -1,0 +1,7 @@
+gymnasium>=0.29.1,<1.1.0
+numpy==1.26.4
+stable_baselines3==2.4.0
+sb3-contrib==2.4.0
+mujoco==3.2.2
+meshcat>=0.3.2
+sbx-rl==0.18.0

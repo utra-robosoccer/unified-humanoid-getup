@@ -1,53 +1,57 @@
 #!/usr/bin/env python3
 import subprocess
 
+
 def main():
     # List all the robot names you want to sweep over:
     robot_names = [
         # s2
-
-        # ['sig'],
-        # ['bitbot'],
+        # ['sigmaban'],
+        # ['wolfgang'],
         # ['nugus'],
         #
         # ['bez1'],
-        # ['op3'],
-        # ['bez'],
+        # ['op3_rot'],
+        # ['bez2'],
         # ['bez3'],
         #
-        # ['sig'],
-        # ['bitbot'],
+        # ['sigmaban'],
+        # ['wolfgang'],
         # ['nugus'],
         # all 7
-        # [ 'bez1','op3','bez','bez3', 'sig', 'bitbot', 'nugus'],
+        # [ 'bez1','op3_rot','bez2','bez3', 'sigmaban', 'wolfgang', 'nugus'],
         # s1
-        # ['op3', 'bez', 'bez3', 'sig', 'bitbot', 'nugus'],
-        # ['bez1', 'bez', 'bez3', 'sig', 'bitbot', 'nugus'],
-        # ['bez1', 'op3', 'bez3', 'sig', 'bitbot', 'nugus'],
-        # ['bez1', 'op3', 'bez', 'sig', 'bitbot', 'nugus'],
-        # ['bez1', 'op3', 'bez', 'bez3', 'bitbot', 'nugus'],
-        # ['bez1', 'op3', 'bez', 'bez3', 'sig', 'nugus'],
-        # ['bez1', 'op3', 'bez', 'bez3', 'sig', 'bitbot'],
-
+        # ['op3_rot', 'bez2', 'bez3', 'sigmaban', 'wolfgang', 'nugus'],
+        # ['bez1', 'bez2', 'bez3', 'sigmaban', 'wolfgang', 'nugus'],
+        # ['bez1', 'op3_rot', 'bez3', 'sigmaban', 'wolfgang', 'nugus'],
+        # ['bez1', 'op3_rot', 'bez2', 'sigmaban', 'wolfgang', 'nugus'],
+        # ['bez1', 'op3_rot', 'bez2', 'bez3', 'wolfgang', 'nugus'],
+        # ['bez1', 'op3_rot', 'bez2', 'bez3', 'sigmaban', 'nugus'],
+        # ['bez1', 'op3_rot', 'bez2', 'bez3', 'sigmaban', 'wolfgang'],
         # # s3
-        # ['bez3', 'op3',  'bitbot',],
-        # [ 'bez', 'bez3','op3', 'bitbot', 'nugus'],
+        # ['bez3', 'op3_rot',  'wolfgang',],
+        # [ 'bez2', 'bez3','op3_rot', 'wolfgang', 'nugus'],
         # ['bez1',  'bez3', 'nugus'],
         # s4
-        # ['bez', 'sig'],
-        # ['op3', 'bez', 'sig'],
-        ['bez1', 'op3', 'bez', 'sig'],
-        # ['bez1', 'op3', 'bez', 'sig', 'nugus'],
+        # ['bez2', 'sigmaban'],
+        # ['op3_rot', 'bez2', 'sigmaban'],
+        ["bez1", "op3_rot", "bez2", "sigmaban"],
+        # ['bez1', 'op3_rot', 'bez2', 'sigmaban', 'nugus'],
     ]
 
     for i in range(7):
         for name in robot_names:
             cmd = [
-                "python", "train_sbx.py",
-                "--algo", "crossq",
-                "--env", "frasa-standup-v0",
-                "--conf", "hyperparams/crossq.yml",
-                "--env-kwargs", f"robot_name:{name}"
+                "python",
+                "train_sbx.py",
+                "--algo",
+                "crossq",
+                "--env",
+                "unified-humanoid-get-up-env-standup-v0",
+                "--conf",
+                "hyperparams/crossq.yml",
+                "--env-kwargs",
+                f"robot_name:{name}",
             ]
             print(f"\n=== Running training for robot_name='{name}' ===")
             try:
@@ -57,6 +61,7 @@ def main():
                 break
             else:
                 print(f"✔ Finished training for '{name}'")
+
 
 if __name__ == "__main__":
     main()

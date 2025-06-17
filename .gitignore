@@ -1,4 +1,3 @@
-sigmaban_model
 **/__pycache__
 **.pyc
 **.json
@@ -6,3 +5,4 @@ sigmaban_model
 data/
 *.egg-info
 **/logs
+.idea

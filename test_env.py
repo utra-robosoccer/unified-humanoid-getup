@@ -7,12 +7,12 @@ from stable_baselines3.common.noise import (
     OrnsteinUhlenbeckActionNoise,
 )
 
-import frasa_env
+import unified_humanoid_get_up_env
 
-gym.register_envs(frasa_env)
+gym.register_envs(unified_humanoid_get_up_env)
 
 argparser = argparse.ArgumentParser(description="Test the sigmaban-standup-v0 environment")
-argparser.add_argument("--env", type=str, default="frasa-standup-v0", help="Environment to test")
+argparser.add_argument("--env", type=str, default="unified-humanoid-get-up-env-standup-v0", help="Environment to test")
 argparser.add_argument("--random", action="store_true", help="Use random actions instead of zeros")
 argparser.add_argument("--normal", action="store_true", help="Use normal action noise")
 argparser.add_argument("--orn", action="store_true", help="Use Ornstein-Uhlenbeck action noise")

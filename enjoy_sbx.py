@@ -1,30 +1,26 @@
-import gymnasium as gym
-import numpy as np
-import rl_zoo3
-import rl_zoo3.enjoy
-from rl_zoo3.enjoy import enjoy
-from sbx import DDPG, DQN, PPO, SAC, TD3, TQC, CrossQ
 import argparse
 import importlib
 import os
 import sys
 
+import gymnasium as gym
 import numpy as np
-import torch as th
-import yaml
-from huggingface_sb3 import EnvironmentName
-from stable_baselines3.common.callbacks import tqdm
-from stable_baselines3.common.utils import set_random_seed
-
+import rl_zoo3.enjoy
 import rl_zoo3.import_envs  # noqa: F401 pylint: disable=unused-import
+import torch as th
+import yaml  # type: ignore[import-untyped]
+from huggingface_sb3 import EnvironmentName
 from rl_zoo3 import ALGOS, create_test_env, get_saved_hyperparams
 from rl_zoo3.exp_manager import ExperimentManager
 from rl_zoo3.load_from_hub import download_from_hub
 from rl_zoo3.utils import StoreDict, get_model_path
+from sbx import DDPG, DQN, PPO, SAC, TD3, TQC, CrossQ
+from stable_baselines3.common.callbacks import tqdm
+from stable_baselines3.common.utils import set_random_seed
 
-import frasa_env
+import unified_humanoid_get_up_env
 
-gym.register_envs(frasa_env)
+gym.register_envs(unified_humanoid_get_up_env)
 
 rl_zoo3.ALGOS["ddpg"] = DDPG
 rl_zoo3.ALGOS["dqn"] = DQN
@@ -38,18 +34,21 @@ rl_zoo3.ALGOS["crossq"] = CrossQ
 rl_zoo3.enjoy.ALGOS = rl_zoo3.ALGOS
 rl_zoo3.exp_manager.ALGOS = rl_zoo3.ALGOS
 
+
 def enjoy2() -> None:  # noqa: C901
     parser = argparse.ArgumentParser()
     parser.add_argument("--env", help="environment ID", type=EnvironmentName, default="CartPole-v1")
     parser.add_argument("-f", "--folder", help="Log folder", type=str, default="rl-trained-agents")
-    parser.add_argument("--algo", help="RL Algorithm", default="ppo", type=str, required=False, choices=list(ALGOS.keys()))
+    parser.add_argument(
+        "--algo", help="RL Algorithm", default="ppo", type=str, required=False, choices=list(ALGOS.keys())
+    )
     parser.add_argument("-n", "--n-timesteps", help="number of timesteps", default=1000, type=int)
     parser.add_argument("--num-threads", help="Number of threads for PyTorch (-1 to use default)", default=-1, type=int)
     parser.add_argument("--n-envs", help="number of environments", default=1, type=int)
     parser.add_argument("--exp-id", help="Experiment ID (default: 0: latest, -1: no exp folder)", default=0, type=int)
     parser.add_argument("--verbose", help="Verbose mode (0: no output, 1: INFO)", default=1, type=int)
     parser.add_argument(
-        "--no-render", action="store_true", default=True, help="Do not render the environment (useful for tests)"
+        "--no-render", action="store_true", default=False, help="Do not render the environment (useful for tests)"
     )
     # parser.add_argument(
     #     "--no-render", action="store_true", default=False, help="Do not render the environment (useful for tests)"
@@ -73,7 +72,10 @@ def enjoy2() -> None:  # noqa: C901
     )
     parser.add_argument("--stochastic", action="store_true", default=False, help="Use stochastic actions")
     parser.add_argument(
-        "--norm-reward", action="store_true", default=False, help="Normalize reward if applicable (trained with VecNormalize)"
+        "--norm-reward",
+        action="store_true",
+        default=False,
+        help="Normalize reward if applicable (trained with VecNormalize)",
     )
     parser.add_argument("--seed", help="Random generator seed", type=int, default=0)
     parser.add_argument("--reward-log", help="Where to log reward", default="", type=str)
@@ -85,7 +87,11 @@ def enjoy2() -> None:  # noqa: C901
         help="Additional external Gym environment package modules to import",
     )
     parser.add_argument(
-        "--env-kwargs", type=str, nargs="+", action=StoreDict, help="Optional keyword argument to pass to the env constructor"
+        "--env-kwargs",
+        type=str,
+        nargs="+",
+        action=StoreDict,
+        help="Optional keyword argument to pass to the env constructor",
     )
     parser.add_argument(
         "--custom-objects", action="store_true", default=False, help="Use custom objects to solve loading issues"
@@ -123,7 +129,9 @@ def enjoy2() -> None:  # noqa: C901
         if "rl-trained-agents" not in folder:
             raise e
         else:
-            print("Pretrained model not found, trying to download it from sb3 Huggingface hub: https://huggingface.co/sb3")
+            print(
+                "Pretrained model not found, trying to download it from sb3 Huggingface hub: https://huggingface.co/sb3"
+            )
             # Auto-download
             download_from_hub(
                 algo=algo,
@@ -183,7 +191,7 @@ def enjoy2() -> None:  # noqa: C901
         stats_path=maybe_stats_path,
         seed=args.seed,
         log_dir=log_dir,
-        should_render= not args.no_render,
+        should_render=not args.no_render,
         hyperparams=hyperparams,
         env_kwargs=env_kwargs,
     )
@@ -244,7 +252,7 @@ def enjoy2() -> None:  # noqa: C901
         if tqdm is None:
             raise ImportError("Please install tqdm and rich to use the progress bar")
         generator = tqdm(generator)
-    n_ep = 100
+    n_ep = 100  # TODO add this as a pass through arg
     ep = 0
     try:
         while ep < n_ep:
@@ -282,7 +290,7 @@ def enjoy2() -> None:  # noqa: C901
                     episode_lengths.append(ep_len)
                     episode_reward = 0.0
                     ep_len = 0
-                    ep+=1
+                    ep += 1
                     # print(env.stand, )
 
                 # Reset also when the goal is achieved when using HER
@@ -309,6 +317,7 @@ def enjoy2() -> None:  # noqa: C901
     #     print(f"Mean episode length: {np.mean(episode_lengths):.2f} +/- {np.std(episode_lengths):.2f}")
 
     env.close()
+
 
 if __name__ == "__main__":
     enjoy2()

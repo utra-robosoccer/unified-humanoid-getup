@@ -1,4 +1,4 @@
-frasa-standup-v0-10ms:
+unified-humanoid-get-up-env-standup-v0-10ms:
   n_timesteps: !!float 30e6
   policy: 'MlpPolicy'
   learning_rate: lin_3e-4
@@ -17,8 +17,8 @@ frasa-standup-v0-10ms:
     optimizer_kwargs=dict(weight_decay=1e-3)
   )"
 
-  
-frasa-standup-v0-25ms:
+
+unified-humanoid-get-up-env-standup-v0-25ms:
   n_timesteps: !!float 20e6
   policy: 'MlpPolicy'
   learning_rate: lin_3e-4
@@ -37,7 +37,7 @@ frasa-standup-v0-25ms:
     optimizer_kwargs=dict(weight_decay=1e-3)
   )"
 
-frasa-standup-v0:
+unified-humanoid-get-up-env-standup-v0:
   n_timesteps: !!float 15e6
   policy: 'MlpPolicy'
   learning_rate: lin_3e-4
@@ -56,7 +56,7 @@ frasa-standup-v0:
     optimizer_kwargs=dict(weight_decay=1e-3)
   )"
 
-frasa-standup-v0-vt:
+unified-humanoid-get-up-env-standup-v0-vt:
   n_timesteps: !!float 20e6
   policy: 'MlpPolicy'
   learning_rate: lin_3e-4
