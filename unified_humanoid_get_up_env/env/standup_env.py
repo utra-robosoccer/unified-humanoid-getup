@@ -17,7 +17,7 @@ class StandupEnv(gymnasium.Env):
 
     def __init__(
         self,
-        robot_name: list = ["bez2"],
+        robot_name: list = ["uw"],
         render_mode="none",
         options: Optional[dict] = None,
         evaluation: bool = False,
@@ -40,7 +40,7 @@ class StandupEnv(gymnasium.Env):
             # "desired_state": np.deg2rad([49.5, 19.5, 52, -82.15, 36.5, 0.65374085940294579533,0.65374085940294579533]),
             # "desired_state": np.deg2rad([0.65374085940294579533, 29.13318501]),
             # "desired_state": np.deg2rad([29.13318501]),
-            "desired_state": np.deg2rad([57.29]),  # 38.525680187183610315
+            "desired_state": np.deg2rad([38.525680187183610315]),  # 57.29 38.525680187183610315  22.9
             # "desired_state": np.deg2rad([31.455094774119341849,0]),
             # Probability of seeding the robot in finale position
             "reset_final_p": 0.1,
@@ -82,7 +82,7 @@ class StandupEnv(gymnasium.Env):
         # self.folder_name = ["wolfgang"]
         # self.folder_name = ["nugus"]
 
-        self.multi = True
+        self.multi = False
         self.record = False
         self.stand = False
         self.stand_time = float("inf")
@@ -101,6 +101,7 @@ class StandupEnv(gymnasium.Env):
             "bez1": 0.48083660868911876,
             "wolfgang": 0.7673033792122936,
             "nugus": 0.8086855785416924,
+            "uw": 0.48083660868911876,
         }
         self.desired_height = self.hei[self.folder_name[0]]
 
@@ -119,7 +120,7 @@ class StandupEnv(gymnasium.Env):
                 with open(initial_config_path, "rb") as f:
                     self.initial_config.append(pickle.load(f))
 
-        assert len(self.initial_config) == len(self.folder_name)
+        # assert len(self.initial_config) == len(self.folder_name)
 
         # Degrees of freedom involved
         self.dofs = ["elbow", "shoulder_pitch", "hip_pitch", "knee", "ankle_pitch"]
@@ -250,7 +251,7 @@ class StandupEnv(gymnasium.Env):
 
     def get_tilt(self):
         R = self.trunk_site.xmat
-        return np.arctan2(R[6], R[8])
+        return -np.arctan2(R[7], R[8])
 
     def get_observation(self) -> np.ndarray:
         # Retrieving joints
@@ -376,7 +377,7 @@ class StandupEnv(gymnasium.Env):
         obs = self.get_observation()
         state_current = [self.height_history[-1]]
         reward = np.exp(-10 * (np.linalg.norm(np.array(state_current) - np.array(self.options["desired_state"])) ** 2))
-        desired_height = 0.4  # self.desired_height[self.current_index]
+        desired_height = 0.34  # self.desired_height[self.current_index]
         if (
             state_current[0] >= desired_height
         ):  # ((abs(desired_height - state_current[0]) / desired_height) * 100) < 10:

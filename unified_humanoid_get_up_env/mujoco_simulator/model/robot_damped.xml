@@ -1,0 +1,332 @@
+<mujoco model="assembly">
+  <!-- Generated using onshape-to-robot -->
+  <!-- Onshape https://cad.onshape.com/documents/edea034631796554fe7de906/w/0725cd49d9878c86b643a14d/e/ef4419f73ceb4e549626bf9b -->
+  <compiler angle="radian" meshdir="assets" />
+  <default>
+    <default class="feetech">
+      <!-- from https://github.com/humancomputerlab/LeLamp/blob/master/simulation/robot.xml#L25 -->
+      <joint damping="0.60" frictionloss="0.052" armature="0.028"/>
+      <position kp="17.8" kv="0.0" />
+      <default class="visual">
+        <geom type="mesh" contype="0" conaffinity="0" group="2" />
+      </default>
+      <default class="collision">
+        <geom group="3" />
+      </default>
+    </default>
+  </default>
+
+  <worldbody>
+
+    <geom name="ground" type="plane" size="10 10 0.1" pos="0 0 -0.1" quat="1 0 0 0" rgba="0.8 0.8 0.8 1" contype="1" conaffinity="1" />
+
+    <!-- Link torso -->
+    <body name="torso_2023" pos="0 0 0" quat="1 0 0 0" childclass="feetech">
+        <freejoint name="root" />
+<!--      <freejoint name="torso_freejoint"/>-->
+        <site name="torso" />
+        <site name="trunk" pos="-0.0 0.05 -0.05" />
+      <inertial pos="-2.59269e-07 0.0654878 -0.0078332" mass="1.25968" fullinertia="0.00401254 0.00450993 0.00269862 -3.98569e-09 -1.83499e-08 0.000396725"/>
+      <!-- Part torso_parts -->
+      <geom type="mesh" class="visual" pos="-2.59269e-07 0.0654878 -0.0078332" quat="1 0 0 0" mesh="torso_visual" material="torso_visual_material"/>
+      <geom type="mesh" class="collision" pos="-2.59269e-07 0.0654878 -0.0078332" quat="1 0 0 0" mesh="torso_collision" material="torso_collision_material"/>
+      <!-- Link yaw_adapter -->
+      <body name="yaw_adapter" pos="-0.04236 0.04511 -0.0794175" quat="0 0 0 1">
+        <!-- Joint from torso to yaw_adapter -->
+        <joint axis="0 0 1" name="right_hip_yaw" class="feetech"/>
+        <inertial pos="3.24372e-11 -0.000458903 -0.0137673" mass="0.015882" fullinertia="6.07525e-06 2.82322e-06 4.89494e-06 1.97385e-13 -1.22003e-14 -1.23672e-07"/>
+        <!-- Part yaw_adapter_parts -->
+        <geom type="mesh" class="visual" pos="3.24372e-11 -0.000458903 -0.0137673" quat="9.56992e-17 0 5.62815e-17 -1" mesh="yaw_adapter_visual" material="yaw_adapter_visual_material"/>
+        <geom type="mesh" class="collision" pos="3.24372e-11 -0.000458903 -0.0137673" quat="9.56992e-17 0 5.62815e-17 -1" mesh="yaw_adapter_collision" material="yaw_adapter_collision_material"/>
+        <!-- Link pitch_roll_housing -->
+        <body name="pitch_roll_housing" pos="-6.93889e-18 -0.021075 -0.03011" quat="2.46199e-58 -0 0.707107 0.707107">
+          <!-- Joint from yaw_adapter to pitch_roll_housing -->
+          <joint axis="0 0 1" name="right_hip_roll" class="feetech"/>
+          <inertial pos="-0.000322808 -0.0137311 0.00416399" mass="0.152157" fullinertia="0.000116157 9.723e-05 5.17002e-05 2.64631e-07 7.24198e-07 -5.97209e-06"/>
+          <!-- Part pitch_roll_housing_parts -->
+          <geom type="mesh" class="visual" pos="-0.000322808 -0.0137311 0.00416399" quat="0.707107 -0.707107 0 1.11896e-30" mesh="pitch_roll_housing_visual" material="pitch_roll_housing_visual_material"/>
+          <geom type="mesh" class="collision" pos="-0.000322808 -0.0137311 0.00416399" quat="0.707107 -0.707107 0 1.11896e-30" mesh="pitch_roll_housing_collision" material="pitch_roll_housing_collision_material"/>
+          <!-- Link knee_housing -->
+          <body name="knee_housing" pos="-0.018825 -1.11022e-16 0.018825" quat="0.707107 0 0.707107 -0">
+            <!-- Joint from pitch_roll_housing to knee_housing -->
+            <joint axis="0 0 1" name="right_hip_pitch" class="feetech"/>
+            <inertial pos="1.09705e-06 -0.0701498 0.0183268" mass="0.0990093" fullinertia="0.000110748 3.19926e-05 9.22632e-05 8.55711e-09 1.84109e-09 -2.68941e-06"/>
+            <!-- Part knee_housing_parts -->
+            <geom type="mesh" class="visual" pos="1.09705e-06 -0.0701498 0.0183268" quat="0.5 -0.5 -0.5 -0.5" mesh="knee_housing_visual" material="knee_housing_visual_material"/>
+            <geom type="mesh" class="collision" pos="1.09705e-06 -0.0701498 0.0183268" quat="0.5 -0.5 -0.5 -0.5" mesh="knee_housing_collision" material="knee_housing_collision_material"/>
+            <!-- Link knee_ankle_rotor_case -->
+            <body name="knee_ankle_rotor_case" pos="0 -0.10022 0" quat="1 0 0 0">
+              <!-- Joint from knee_housing to knee_ankle_rotor_case -->
+              <joint axis="0 0 1" name="right_knee" class="feetech"/>
+              <inertial pos="1.04083e-17 -0.0420709 0.0188591" mass="0.043594" fullinertia="5.21675e-05 1.91573e-05 3.72586e-05 0 0 8.24107e-09"/>
+              <!-- Part knee_ankle_rotor_case_parts -->
+              <geom type="mesh" class="visual" pos="1.38778e-17 -0.0420709 0.0188591" quat="0.5 -0.5 -0.5 -0.5" mesh="knee_ankle_rotor_case_visual" material="knee_ankle_rotor_case_visual_material"/>
+              <geom type="mesh" class="collision" pos="1.38778e-17 -0.0420709 0.0188591" quat="0.5 -0.5 -0.5 -0.5" mesh="knee_ankle_rotor_case_collision" material="knee_ankle_rotor_case_collision_material"/>
+              <!-- Link sts3250 -->
+              <body name="sts3250" pos="1.38778e-17 -0.09522 2.77556e-17" quat="1.22465e-16 1 0 -3.06162e-17">
+                <!-- Joint from knee_ankle_rotor_case to sts3250 -->
+                <joint axis="0 0 -1" name="right_ankle_pitch" class="feetech"/>
+                <inertial pos="0.0154245 -0.0123715 -0.0184091" mass="0.14555" fullinertia="4.62339e-05 0.000103932 0.00011985 2.1482e-06 9.51397e-07 -5.93605e-08"/>
+                <!-- Part sts3250_parts -->
+                <geom type="mesh" class="visual" pos="0.0154245 -0.0123715 -0.0184091" quat="0.5 0.5 0.5 -0.5" mesh="sts3250_visual" material="sts3250_visual_material"/>
+                <geom type="mesh" class="collision" pos="0.0154245 -0.0123715 -0.0184091" quat="0.5 0.5 0.5 -0.5" mesh="sts3250_collision" material="sts3250_collision_material"/>
+                <!-- Link foot -->
+                <body name="foot" pos="0.024725 9.04235e-10 -0.018825" quat="0.707107 8.65956e-17 0.707107 -0">
+                    <site name="right_foot"/>
+                  <!-- Joint from sts3250 to foot -->
+                  <joint axis="0 0 1" name="right_ankle_roll" class="feetech"/>
+                  <inertial pos="5.58176e-09 0.0197347 -0.0475044" mass="0.0879022" fullinertia="0.000142062 0.000157128 2.44044e-05 -8.38229e-13 -7.8354e-12 -6.00865e-06"/>
+                  <!-- Part foot_parts -->
+                  <geom type="mesh" class="visual" pos="5.58176e-09 0.0197347 -0.0475044" quat="0.707107 0.707107 0 -7.30533e-49" mesh="foot_visual" material="foot_visual_material"/>
+                  <geom type="mesh" class="collision" pos="5.58176e-09 0.0197347 -0.0475044" quat="0.707107 0.707107 0 -7.30533e-49" mesh="foot_collision" material="foot_collision_material"/>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <!-- Link yaw_adapter_2 -->
+      <body name="yaw_adapter_2" pos="0.04236 0.04511 -0.0794175" quat="4.69282e-21 6.12323e-17 1.11022e-16 1">
+        <!-- Joint from torso to yaw_adapter_2 -->
+        <joint axis="0 0 -1" name="left_hip_yaw" class="feetech"/>
+        <inertial pos="3.24372e-11 -0.000458903 -0.0137673" mass="0.015882" fullinertia="6.07525e-06 2.82322e-06 4.89494e-06 1.97385e-13 -1.22003e-14 -1.23672e-07"/>
+        <!-- Part yaw_adapter_2_parts -->
+        <geom type="mesh" class="visual" pos="3.24372e-11 -0.000458903 -0.0137673" quat="4.69282e-21 6.12323e-17 -1.11022e-16 1" mesh="yaw_adapter_2_visual" material="yaw_adapter_2_visual_material"/>
+        <geom type="mesh" class="collision" pos="3.24372e-11 -0.000458903 -0.0137673" quat="4.69282e-21 6.12323e-17 -1.11022e-16 1" mesh="yaw_adapter_2_collision" material="yaw_adapter_2_collision_material"/>
+        <!-- Link bearing -->
+        <body name="bearing" pos="6.93889e-18 -0.021075 -0.03011" quat="1.26218e-29 -0 -0.707107 -0.707107">
+          <!-- Joint from yaw_adapter_2 to bearing -->
+          <joint axis="0 0 -1" name="left_hip_roll" class="feetech"/>
+          <inertial pos="-0.000322808 -0.0137311 0.00416399" mass="0.152157" fullinertia="0.000116157 9.723e-05 5.17002e-05 2.64631e-07 7.24198e-07 -5.97209e-06"/>
+          <!-- Part bearing_parts -->
+          <geom type="mesh" class="visual" pos="-0.000322808 -0.0137311 0.00416399" quat="0.707107 -0.707107 -0 4.32978e-17" mesh="bearing_visual" material="bearing_visual_material"/>
+          <geom type="mesh" class="collision" pos="-0.000322808 -0.0137311 0.00416399" quat="0.707107 -0.707107 -0 4.32978e-17" mesh="bearing_collision" material="bearing_collision_material"/>
+          <!-- Link sts3250_2 -->
+          <body name="sts3250_2" pos="0.018825 -1.11022e-16 0.018825" quat="4.32978e-17 0.707107 -0 -0.707107">
+            <!-- Joint from bearing to sts3250_2 -->
+            <joint axis="0 0 -1" name="left_hip_pitch" class="feetech"/>
+            <inertial pos="1.09705e-06 0.0701498 0.0193232" mass="0.0990093" fullinertia="0.000110748 3.19926e-05 9.22632e-05 -8.55711e-09 -1.84109e-09 -2.68941e-06"/>
+            <!-- Part sts3250_2_parts -->
+            <geom type="mesh" class="visual" pos="1.09705e-06 0.0701498 0.0193232" quat="0.5 0.5 0.5 -0.5" mesh="sts3250_2_visual" material="sts3250_2_visual_material"/>
+            <geom type="mesh" class="collision" pos="1.09705e-06 0.0701498 0.0193232" quat="0.5 0.5 0.5 -0.5" mesh="sts3250_2_collision" material="sts3250_2_collision_material"/>
+            <!-- Link knee_ankle_rotor_case_2 -->
+            <body name="knee_ankle_rotor_case_2" pos="0 0.10022 0" quat="1 0 0 0">
+              <!-- Joint from sts3250_2 to knee_ankle_rotor_case_2 -->
+              <joint axis="0 0 -1" name="left_knee" class="feetech"/>
+              <inertial pos="1.04083e-17 0.0420709 0.0187909" mass="0.043594" fullinertia="5.21675e-05 1.91573e-05 3.72586e-05 0 0 8.24107e-09"/>
+              <!-- Part knee_ankle_rotor_case_2_parts -->
+              <geom type="mesh" class="visual" pos="1.38778e-17 0.0420709 0.0187909" quat="0.5 0.5 0.5 -0.5" mesh="knee_ankle_rotor_case_2_visual" material="knee_ankle_rotor_case_2_visual_material"/>
+              <geom type="mesh" class="collision" pos="1.38778e-17 0.0420709 0.0187909" quat="0.5 0.5 0.5 -0.5" mesh="knee_ankle_rotor_case_2_collision" material="knee_ankle_rotor_case_2_collision_material"/>
+              <!-- Link sts3250_3 -->
+              <body name="sts3250_3" pos="1.38778e-17 0.09522 0" quat="1.22465e-16 1 0 3.06162e-17">
+                <!-- Joint from knee_ankle_rotor_case_2 to sts3250_3 -->
+                <joint axis="0 0 1" name="left_ankle_pitch" class="feetech"/>
+                <inertial pos="0.0154245 0.0123715 -0.0192409" mass="0.14555" fullinertia="4.62339e-05 0.000103932 0.00011985 -2.1482e-06 -9.51397e-07 -5.93605e-08"/>
+                <!-- Part sts3250_3_parts -->
+                <geom type="mesh" class="visual" pos="0.0154245 0.0123715 -0.0192409" quat="0.5 -0.5 -0.5 -0.5" mesh="sts3250_3_visual" material="sts3250_3_visual_material"/>
+                <geom type="mesh" class="collision" pos="0.0154245 0.0123715 -0.0192409" quat="0.5 -0.5 -0.5 -0.5" mesh="sts3250_3_collision" material="sts3250_3_collision_material"/>
+                <!-- Link foot_2 -->
+                <body name="foot_2" pos="0.024725 -9.04235e-10 -0.018825" quat="8.65956e-17 -0.707107 1.11022e-16 -0.707107">
+                    <site name="left_foot"/>
+                  <!-- Joint from sts3250_3 to foot_2 -->
+                  <joint axis="0 0 -1" name="left_ankle_roll" class="feetech"/>
+                  <inertial pos="5.58176e-09 0.0197347 -0.0475044" mass="0.0879022" fullinertia="0.000142062 0.000157128 2.44044e-05 -8.38229e-13 -7.8354e-12 -6.00865e-06"/>
+                  <!-- Part foot_2_parts -->
+                  <geom type="mesh" class="visual" pos="5.58176e-09 0.0197347 -0.0475044" quat="0.707107 0.707107 0 -1.46107e-48" mesh="foot_2_visual" material="foot_2_visual_material"/>
+                  <geom type="mesh" class="collision" pos="5.58176e-09 0.0197347 -0.0475044" quat="0.707107 0.707107 0 -1.46107e-48" mesh="foot_2_collision" material="foot_2_collision_material"/>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <!-- Link shoulder_rightangle -->
+      <body name="shoulder_rightangle" pos="0.061185 0.02011 0.0605925" quat="0.5 -0.5 -0.5 0.5">
+        <!-- Joint from torso to shoulder_rightangle -->
+        <joint axis="0 0 -1" name="left_shoulder_pitch" class="feetech"/>
+        <inertial pos="-0.000405734 0.00767679 -0.0212962" mass="0.0317299" fullinertia="1.35964e-05 1.71141e-05 1.77104e-05 3.98666e-07 -2.2438e-07 4.24225e-06"/>
+        <!-- Part shoulder_rightangle_parts -->
+        <geom type="mesh" class="visual" pos="-0.000405734 0.00767679 -0.0212962" quat="0.5 0.5 0.5 -0.5" mesh="shoulder_rightangle_visual" material="shoulder_rightangle_visual_material"/>
+        <geom type="mesh" class="collision" pos="-0.000405734 0.00767679 -0.0212962" quat="0.5 0.5 0.5 -0.5" mesh="shoulder_rightangle_collision" material="shoulder_rightangle_collision_material"/>
+        <!-- Link bicep -->
+        <body name="bicep" pos="-0.017825 0.038 -0.0387252" quat="6.59679e-17 -0.707107 -1.11022e-16 0.707107">
+          <!-- Joint from shoulder_rightangle to bicep -->
+          <joint axis="0 0 1" name="left_shoulder_roll" class="feetech"/>
+          <inertial pos="-0.000137418 -0.0333694 -0.0209277" mass="0.0928907" fullinertia="0.000123449 2.42426e-05 0.00011859 -8.13477e-07 1.02394e-07 -1.32317e-05"/>
+          <!-- Part bicep_parts -->
+          <geom type="mesh" class="visual" pos="-0.000137418 -0.0333694 -0.0209277" quat="0.707107 -0.707107 -1.11022e-16 9.54326e-17" mesh="bicep_visual" material="bicep_visual_material"/>
+          <geom type="mesh" class="collision" pos="-0.000137418 -0.0333694 -0.0209277" quat="0.707107 -0.707107 -1.11022e-16 9.54326e-17" mesh="bicep_collision" material="bicep_collision_material"/>
+          <!-- Link forearm -->
+          <body name="forearm" pos="0.019825 -0.09586 -0.01345" quat="0.707107 -1.33958e-16 0.707107 2.16495e-16">
+            <!-- Joint from bicep to forearm -->
+            <joint axis="0 0 1" name="left_elbow" class="feetech"/>
+            <inertial pos="0.0026095 -0.0296011 -0.0182997" mass="0.0855891" fullinertia="0.000110205 1.9857e-05 0.0001067 1.24531e-05 2.54898e-07 -1.88097e-06"/>
+            <!-- Part forearm_parts -->
+            <geom type="mesh" class="visual" pos="0.0026095 -0.0296011 -0.0182997" quat="0.5 -0.5 -0.5 -0.5" mesh="forearm_visual" material="forearm_visual_material"/>
+            <geom type="mesh" class="collision" pos="0.0026095 -0.0296011 -0.0182997" quat="0.5 -0.5 -0.5 -0.5" mesh="forearm_collision" material="forearm_collision_material"/>
+          </body>
+        </body>
+      </body>
+      <!-- Link shoulder_rightangle_2 -->
+      <body name="shoulder_rightangle_2" pos="-0.061185 0.02011 0.0605925" quat="0.5 0.5 0.5 0.5">
+        <!-- Joint from torso to shoulder_rightangle_2 -->
+        <joint axis="0 0 1" name="right_shoulder_pitch" class="feetech"/>
+        <inertial pos="0.000405734 -0.00767679 -0.0212962" mass="0.0317299" fullinertia="1.35964e-05 1.71141e-05 1.77104e-05 3.98666e-07 2.2438e-07 -4.24225e-06"/>
+        <!-- Part shoulder_rightangle_2_parts -->
+        <geom type="mesh" class="visual" pos="0.000405734 -0.00767679 -0.0212962" quat="0.5 -0.5 -0.5 -0.5" mesh="shoulder_rightangle_2_visual" material="shoulder_rightangle_2_visual_material"/>
+        <geom type="mesh" class="collision" pos="0.000405734 -0.00767679 -0.0212962" quat="0.5 -0.5 -0.5 -0.5" mesh="shoulder_rightangle_2_collision" material="shoulder_rightangle_2_collision_material"/>
+        <!-- Link sts3250_4 -->
+        <body name="sts3250_4" pos="-0.019825 -0.038 -0.0387252" quat="1.09266e-16 0.707107 -1.11022e-16 -0.707107">
+          <!-- Joint from shoulder_rightangle_2 to sts3250_4 -->
+          <joint axis="0 0 -1" name="right_shoulder_roll" class="feetech"/>
+          <inertial pos="-0.000139766 0.0333694 -0.0209277" mass="0.0928907" fullinertia="0.000123449 2.42425e-05 0.00011859 7.95519e-07 1.06717e-07 1.32317e-05"/>
+          <!-- Part sts3250_4_parts -->
+          <geom type="mesh" class="visual" pos="-0.000139766 0.0333694 -0.0209277" quat="1.09266e-16 -6.59679e-17 -0.707107 0.707107" mesh="sts3250_4_visual" material="sts3250_4_visual_material"/>
+          <geom type="mesh" class="collision" pos="-0.000139766 0.0333694 -0.0209277" quat="1.09266e-16 -6.59679e-17 -0.707107 0.707107" mesh="sts3250_4_collision" material="sts3250_4_collision_material"/>
+          <!-- Link sts3250_5 -->
+          <body name="sts3250_5" pos="0.019825 0.09586 -0.01345" quat="3.21612e-30 -0.707107 0 -0.707107">
+            <!-- Joint from sts3250_4 to sts3250_5 -->
+            <joint axis="0 0 -1" name="right_elbow" class="feetech"/>
+            <inertial pos="-0.00260696 -0.0296011 -0.0182997" mass="0.0855891" fullinertia="0.000110205 1.98582e-05 0.000106701 -1.24702e-05 -2.58671e-07 -1.88118e-06"/>
+            <!-- Part sts3250_5_parts -->
+            <geom type="mesh" class="visual" pos="-0.00260696 -0.0296011 -0.0182997" quat="0.5 -0.5 0.5 0.5" mesh="sts3250_5_visual" material="sts3250_5_visual_material"/>
+            <geom type="mesh" class="collision" pos="-0.00260696 -0.0296011 -0.0182997" quat="0.5 -0.5 0.5 0.5" mesh="sts3250_5_collision" material="sts3250_5_collision_material"/>
+          </body>
+        </body>
+      </body>
+      <!-- Link sts3250_6 -->
+      <body name="sts3250_6" pos="0 0.02011 0.0858825" quat="1.22465e-16 -1 0 0">
+        <!-- Joint from torso to sts3250_6 -->
+        <joint axis="0 0 1" name="head_yaw" class="feetech"/>
+
+        <inertial pos="0.00146817 -0.00929036 -0.0151995" mass="0.0622194" fullinertia="1.83354e-05 1.41601e-05 2.29833e-05 -1.1613e-07 1.3449e-07 8.44616e-07"/>
+        <!-- Part sts3250_6_parts -->
+        <geom type="mesh" class="visual" pos="0.00146817 -0.00929036 -0.0151995" quat="1.22465e-16 1 -0 -2.29394e-66" mesh="sts3250_6_visual" material="sts3250_6_visual_material"/>
+        <geom type="mesh" class="collision" pos="0.00146817 -0.00929036 -0.0151995" quat="1.22465e-16 1 -0 -2.29394e-66" mesh="sts3250_6_collision" material="sts3250_6_collision_material"/>
+        <!-- Link camera_enclosure -->
+        <body name="camera_enclosure" pos="0.0194521 0.00310933 -0.0166382" quat="6.27345e-16 0.707107 -6.66134e-16 -0.707107">
+            <site name="camera" />
+          <!-- Joint from sts3250_6 to camera_enclosure -->
+          <joint axis="0 0 1" name="head_pitch" class="feetech"/>
+          <inertial pos="0.0259913 -0.00211283 0.0195868" mass="0.0431312" fullinertia="3.21869e-05 3.45044e-05 7.90515e-06 4.09566e-07 2.56124e-07 -2.38572e-08"/>
+          <!-- Part camera_enclosure_parts -->
+          <geom type="mesh" class="visual" pos="0.0259913 -0.00211283 0.0195868" quat="0.707107 5.51642e-16 0.707107 -4.99167e-16" mesh="camera_enclosure_visual" material="camera_enclosure_visual_material"/>
+          <geom type="mesh" class="collision" pos="0.0259913 -0.00211283 0.0195868" quat="0.707107 5.51642e-16 0.707107 -4.99167e-16" mesh="camera_enclosure_collision" material="camera_enclosure_collision_material"/>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+    <sensor>
+        <gyro site="torso" name="gyro" />
+        <accelerometer site="torso" name="accelerometer" />
+    </sensor>
+  <asset>
+    <mesh file="merged\foot_2_visual.stl" />
+    <mesh file="merged\knee_ankle_rotor_case_visual.stl" />
+    <mesh file="merged\knee_housing_visual.stl" />
+    <mesh file="merged\sts3250_6_visual.stl" />
+    <mesh file="merged\yaw_adapter_visual.stl" />
+    <mesh file="merged\camera_enclosure_collision.stl" />
+    <mesh file="merged\foot_visual.stl" />
+    <mesh file="merged\bearing_visual.stl" />
+    <mesh file="merged\sts3250_4_visual.stl" />
+    <mesh file="merged\sts3250_3_visual.stl" />
+    <mesh file="merged\torso_collision.stl" />
+    <mesh file="merged\yaw_adapter_collision.stl" />
+    <mesh file="merged\foot_collision.stl" />
+    <mesh file="merged\shoulder_rightangle_visual.stl" />
+    <mesh file="merged\camera_enclosure_visual.stl" />
+    <mesh file="merged\sts3250_4_collision.stl" />
+    <mesh file="merged\sts3250_collision.stl" />
+    <mesh file="merged\sts3250_visual.stl" />
+    <mesh file="merged\sts3250_3_collision.stl" />
+    <mesh file="merged\bearing_collision.stl" />
+    <mesh file="merged\shoulder_rightangle_collision.stl" />
+    <mesh file="merged\yaw_adapter_2_collision.stl" />
+    <mesh file="merged\bicep_collision.stl" />
+    <mesh file="merged\shoulder_rightangle_2_visual.stl" />
+    <mesh file="merged\forearm_visual.stl" />
+    <mesh file="merged\pitch_roll_housing_collision.stl" />
+    <mesh file="merged\sts3250_6_collision.stl" />
+    <mesh file="merged\sts3250_5_visual.stl" />
+    <mesh file="merged\pitch_roll_housing_visual.stl" />
+    <mesh file="merged\forearm_collision.stl" />
+    <mesh file="merged\knee_housing_collision.stl" />
+    <mesh file="merged\knee_ankle_rotor_case_2_collision.stl" />
+    <mesh file="merged\sts3250_2_collision.stl" />
+    <mesh file="merged\sts3250_2_visual.stl" />
+    <mesh file="merged\knee_ankle_rotor_case_2_visual.stl" />
+    <mesh file="merged\knee_ankle_rotor_case_collision.stl" />
+    <mesh file="merged\yaw_adapter_2_visual.stl" />
+    <mesh file="merged\foot_2_collision.stl" />
+    <mesh file="merged\sts3250_5_collision.stl" />
+    <mesh file="merged\torso_visual.stl" />
+    <mesh file="merged\bicep_visual.stl" />
+    <mesh file="merged\shoulder_rightangle_2_collision.stl" />
+    <material name="torso_visual_material" rgba="0.505757 0.672338 0.668928 1" />
+    <material name="torso_collision_material" rgba="0.505757 0.672338 0.668928 1" />
+    <material name="yaw_adapter_visual_material" rgba="0.0862745 0.317647 0.690196 1" />
+    <material name="yaw_adapter_collision_material" rgba="0.0862745 0.317647 0.690196 1" />
+    <material name="pitch_roll_housing_visual_material" rgba="0.391406 0.460207 0.389068 1" />
+    <material name="pitch_roll_housing_collision_material" rgba="0.391406 0.460207 0.389068 1" />
+    <material name="knee_housing_visual_material" rgba="0.347706 0.466239 0.293669 1" />
+    <material name="knee_housing_collision_material" rgba="0.347706 0.466239 0.293669 1" />
+    <material name="knee_ankle_rotor_case_visual_material" rgba="0.231373 0.380392 0.705882 1" />
+    <material name="knee_ankle_rotor_case_collision_material" rgba="0.231373 0.380392 0.705882 1" />
+    <material name="sts3250_visual_material" rgba="0.396357 0.456175 0.399432 1" />
+    <material name="sts3250_collision_material" rgba="0.396357 0.456175 0.399432 1" />
+    <material name="foot_visual_material" rgba="0.65098 0.486275 0.0196078 1" />
+    <material name="foot_collision_material" rgba="0.65098 0.486275 0.0196078 1" />
+    <material name="yaw_adapter_2_visual_material" rgba="0.0862745 0.317647 0.690196 1" />
+    <material name="yaw_adapter_2_collision_material" rgba="0.0862745 0.317647 0.690196 1" />
+    <material name="bearing_visual_material" rgba="0.391406 0.460207 0.389068 1" />
+    <material name="bearing_collision_material" rgba="0.391406 0.460207 0.389068 1" />
+    <material name="sts3250_2_visual_material" rgba="0.347706 0.466239 0.293669 1" />
+    <material name="sts3250_2_collision_material" rgba="0.347706 0.466239 0.293669 1" />
+    <material name="knee_ankle_rotor_case_2_visual_material" rgba="0.231373 0.380392 0.705882 1" />
+    <material name="knee_ankle_rotor_case_2_collision_material" rgba="0.231373 0.380392 0.705882 1" />
+    <material name="sts3250_3_visual_material" rgba="0.396357 0.456175 0.399432 1" />
+    <material name="sts3250_3_collision_material" rgba="0.396357 0.456175 0.399432 1" />
+    <material name="foot_2_visual_material" rgba="0.65098 0.486275 0.0196078 1" />
+    <material name="foot_2_collision_material" rgba="0.65098 0.486275 0.0196078 1" />
+    <material name="shoulder_rightangle_visual_material" rgba="0.647059 0.647059 0.647059 1" />
+    <material name="shoulder_rightangle_collision_material" rgba="0.647059 0.647059 0.647059 1" />
+    <material name="bicep_visual_material" rgba="0.457862 0.518983 0.499247 1" />
+    <material name="bicep_collision_material" rgba="0.457862 0.518983 0.499247 1" />
+    <material name="forearm_visual_material" rgba="0.439862 0.517822 0.503377 1" />
+    <material name="forearm_collision_material" rgba="0.439862 0.517822 0.503377 1" />
+    <material name="shoulder_rightangle_2_visual_material" rgba="0.647059 0.647059 0.647059 1" />
+    <material name="shoulder_rightangle_2_collision_material" rgba="0.647059 0.647059 0.647059 1" />
+    <material name="sts3250_4_visual_material" rgba="0.457862 0.518983 0.499247 1" />
+    <material name="sts3250_4_collision_material" rgba="0.457862 0.518983 0.499247 1" />
+    <material name="sts3250_5_visual_material" rgba="0.439862 0.517822 0.503377 1" />
+    <material name="sts3250_5_collision_material" rgba="0.439862 0.517822 0.503377 1" />
+    <material name="sts3250_6_visual_material" rgba="0.386349 0.417291 0.372244 1" />
+    <material name="sts3250_6_collision_material" rgba="0.386349 0.417291 0.372244 1" />
+    <material name="camera_enclosure_visual_material" rgba="0.623322 0.771679 0.860693 1" />
+    <material name="camera_enclosure_collision_material" rgba="0.623322 0.771679 0.860693 1" />
+  </asset>
+  <actuator>
+    <position class="feetech" name="right_hip_yaw" joint="right_hip_yaw" ctrlrange="-1.57 1.57" />
+    <position class="feetech" name="right_hip_roll" joint="right_hip_roll" ctrlrange="-1.57 1.57" />
+    <position class="feetech" name="right_hip_pitch" joint="right_hip_pitch" ctrlrange="-2.356 0.785"/>
+    <position class="feetech" name="right_knee" joint="right_knee" ctrlrange="0 2.793" />
+    <position class="feetech" name="right_ankle_pitch" joint="right_ankle_pitch" ctrlrange="-1.57 1.57" />
+    <position class="feetech" name="right_ankle_roll" joint="right_ankle_roll" ctrlrange="-1.57 1.57" />
+    <position class="feetech" name="left_hip_roll" joint="left_hip_roll" ctrlrange="-1.57 1.57" />
+    <position class="feetech" name="left_hip_yaw" joint="left_hip_yaw" ctrlrange="-1.57 1.57" />
+    <position class="feetech" name="left_hip_pitch" joint="left_hip_pitch"  ctrlrange="-2.356 0.785"/>
+    <position class="feetech" name="left_knee" joint="left_knee"  ctrlrange="0 2.793" />
+    <position class="feetech" name="left_ankle_pitch" joint="left_ankle_pitch"  ctrlrange="-1.57 1.57" />
+    <position class="feetech" name="left_ankle_roll" joint="left_ankle_roll"  ctrlrange="-1.57 1.57" />
+    <position class="feetech" name="left_shoulder_pitch" joint="left_shoulder_pitch"  ctrlrange="-3.14 2" />
+    <position class="feetech" name="left_shoulder_roll" joint="left_shoulder_roll"  ctrlrange="-1.57 1.57" />
+    <position class="feetech" name="left_elbow" joint="left_elbow"  ctrlrange="-3.14 0"/>
+    <position class="feetech" name="right_shoulder_pitch" joint="right_shoulder_pitch"  ctrlrange="-3.14 2" />
+    <position class="feetech" name="right_shoulder_roll" joint="right_shoulder_roll"  ctrlrange="-1.57 1.57" />
+    <position class="feetech" name="right_elbow" joint="right_elbow"  ctrlrange="-3.14 0"/>
+    <position class="feetech" name="head_yaw" joint="head_yaw"  ctrlrange="-1.57 1.57" />
+    <position class="feetech" name="head_pitch" joint="head_pitch"  ctrlrange="-1.57 1.57" />
+  </actuator>
+  <equality />
+</mujoco>

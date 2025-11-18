@@ -9,7 +9,7 @@ gym.register_envs(unified_humanoid_get_up_env)
 
 env = gym.make("unified-humanoid-get-up-env-standup-v0")
 configs: list = []
-filename: str = env.unwrapped.get_initial_config_filename()
+filename: str = env.unwrapped.get_initial_config_filename("uw")
 
 if os.path.exists(filename):
     configs = pickle.load(open(filename, "rb"))

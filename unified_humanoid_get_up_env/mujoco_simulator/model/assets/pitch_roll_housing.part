@@ -1,0 +1,13 @@
+{
+    "configuration": "default",
+    "documentId": "edea034631796554fe7de906",
+    "documentMicroversion": "c688ea37744cfb79d54071e5",
+    "elementId": "f76ce4ff52a7e31b2b60c12d",
+    "fullConfiguration": "default",
+    "id": "Mf8d8r2ODIJ0eEy2F",
+    "isStandardContent": false,
+    "name": "pitch/roll housing <2>",
+    "partId": "ReDH",
+    "suppressed": false,
+    "type": "Part"
+}

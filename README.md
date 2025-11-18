@@ -134,7 +134,7 @@ python3.10 train_sbx.py \
     --algo crossq \
     --env unified-humanoid-get-up-env-standup-v0 \
     --conf hyperparams/crossq.yml \
-    --env-kwargs robot_name:['bez2']
+    --env-kwargs "robot_name:['bez2']"
 ```
 
 Where the arguments are:
@@ -162,7 +162,7 @@ python3.10 enjoy_sbx.py \
     --folder logs/ \
     --load-best \
     --exp-id 0 \
-    --env-kwargs robot_name:['bez2']
+    --env-kwargs "robot_name:['bez2']"
 ```
 
 <img src="https://github.com/user-attachments/assets/05655c5e-64e9-48f4-8f53-d401a03ba40e" align="right" height="250px">

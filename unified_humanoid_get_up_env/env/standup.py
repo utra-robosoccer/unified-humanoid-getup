@@ -4,7 +4,7 @@ from .standup_env import StandupEnv
 
 
 class UnifiedHumanoidGetUpEnv(StandupEnv):
-    def __init__(self, robot_name: list = ["bez2"], evaluation=False, render_mode="none", options=None):
+    def __init__(self, robot_name: list = ["uw"], evaluation=False, render_mode="none", options=None):
         options = options or {}
         options["stabilization_time"] = 2.0
         options["truncate_duration"] = 5.0

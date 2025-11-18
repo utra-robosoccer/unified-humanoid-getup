@@ -306,15 +306,15 @@ def enjoy2() -> None:  # noqa: C901
     except KeyboardInterrupt:
         pass
 
-    # if args.verbose > 0 and len(successes) > 0:
-    #     print(f"Success rate: {100 * np.mean(successes):.2f}%")
-    #
-    # if args.verbose > 0 and len(episode_rewards) > 0:
-    #     print(f"{len(episode_rewards)} Episodes")
-    #     print(f"{np.mean(episode_rewards):.2f},{np.std(episode_rewards):.2f}")
-    #
-    # if args.verbose > 0 and len(episode_lengths) > 0:
-    #     print(f"Mean episode length: {np.mean(episode_lengths):.2f} +/- {np.std(episode_lengths):.2f}")
+    if args.verbose > 0 and len(successes) > 0:
+        print(f"Success rate: {100 * np.mean(successes):.2f}%")
+
+    if args.verbose > 0 and len(episode_rewards) > 0:
+        print(f"{len(episode_rewards)} Episodes")
+        print(f"{np.mean(episode_rewards):.2f},{np.std(episode_rewards):.2f}")
+
+    if args.verbose > 0 and len(episode_lengths) > 0:
+        print(f"Mean episode length: {np.mean(episode_lengths):.2f} +/- {np.std(episode_lengths):.2f}")
 
     env.close()
 

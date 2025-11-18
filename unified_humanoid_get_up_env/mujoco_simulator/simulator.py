@@ -303,7 +303,9 @@ class Simulator:
         # psi, theta, phi, h = fused
 
         # return np.array([phi, psi, theta])
-        return np.array([roll, pitch, yaw])
+        # return np.array([roll, pitch, yaw])
+
+        return np.array([pitch, roll, yaw])
 
     def close_viewer(self) -> None:
         """
@@ -325,8 +327,8 @@ class Simulator:
 if __name__ == "__main__":
 
     # sim = Simulator(scene_name="scene_bez1.xml")
-    sim = Simulator(scene_name="scene_op3_rot.xml")
-    # sim = Simulator(scene_name="scene_bez2.xml")
+    # sim = Simulator(scene_name="scene_uw.xml")
+    sim = Simulator(scene_name="scene_bez2.xml")
     # sim = Simulator(scene_name="scene_bez3.xml")
     # sim = Simulator(scene_name="scene_sigmaban.xml")
     # sim = Simulator(scene_name="scene_wolfgang.xml")
@@ -344,7 +346,8 @@ if __name__ == "__main__":
         sim.render(True)
 
         sim.step()
-
+        print(f"height: {sim.get_head_height()}")
+        print(f"rpy: {sim.get_rpy()}")
         elapsed = time.time() - start
         frames = sim.frame
         print(f"Elapsed: {elapsed:.2f}, Frames: {frames}, FPS: {frames / elapsed:.2f}")
